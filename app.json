@@ -2,7 +2,7 @@
   "expo": {
     "owner": "clumsy-moves-team",
     "name": "Stas GPT",
-    "slug": "stas-gpt-admin",
+    "slug": "stas-gpt",
     "version": "1.0.0",
     "orientation": "portrait",
     "userInterfaceStyle": "dark",
@@ -17,7 +17,7 @@
     },
     "extra": {
       "eas": {
-        "projectId": "8c0647ba-e01a-4b22-8c0e-2c55f12d271f"
+        "projectId": "f738a88a-f99f-4c63-a1a0-7676262b5e95"
       }
     }
   }
