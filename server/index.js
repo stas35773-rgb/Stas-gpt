@@ -16,16 +16,21 @@ app.post('/api/chat', async (req, res) => {
     const { message, images, model } = req.body;
     const isV1 = model === 'v1';
     
-    // Вставляем ТОЧНЫЙ ID модели со скриншота
+    // Рабочие модели NVIDIA
     let modelName = "nvidia/nemotron-3-ultra-550b-a55b:free"; 
     
-    // Для фото используем зрячую модель (если она не сработает, мы потом поменяем её ID)
     if (images && images.length > 0) {
       modelName = "nvidia/nemotron-3.5-super-vl:free"; 
     }
 
+    // ВОТ ЗДЕСЬ НАХОДИТСЯ НАШ ПРОМПТ (вместо systemInstruction)
     const messages = [
-      { role: "system", content: isV1 ? "Ты Stas GPT 1.0. Думай долго, исправляй ошибки." : "Ты Stas GPT Beta. Отвечай быстро." }
+      { 
+        role: "system", 
+        content: isV1 
+          ? "Ты Stas GPT 1.0. Думай долго, исправляй ошибки. Отвечай с помощью обычного текста. НЕ используй LaTeX (символы $ и $$) для формул, пиши математику обычными символами." 
+          : "Ты Stas GPT Beta. Отвечай быстро. НЕ используй LaTeX (символы $ и $$), пиши математику обычными символами." 
+      }
     ];
 
     if (images && images.length > 0) {
@@ -50,4 +55,4 @@ app.post('/api/chat', async (req, res) => {
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`)); 
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
