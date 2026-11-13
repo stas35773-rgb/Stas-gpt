@@ -16,10 +16,11 @@ app.post('/api/chat', async (req, res) => {
     const { message, images, model } = req.body;
     const isV1 = model === 'v1';
     
-    // БЕСПЛАТНЫЕ МОДЕЛИ OpenRouter (с припиской :free)
-    let modelName = isV1 ? "google/gemini-flash-1.5:free" : "meta-llama/llama-3-8b-instruct:free"; 
+    // БЕСПЛАТНЫЕ МОДЕЛИ OpenRouter (актуальные на 2024 год)
+    // Beta - быстрая 8B, 1.0 - умная 70B
+    let modelName = isV1 ? "meta-llama/llama-3.1-70b-instruct:free" : "meta-llama/llama-3.1-8b-instruct:free"; 
     
-    // Если есть фото, берем бесплатную модель, которая видит картинки
+    // Если есть фото, берем бесплатную Gemini Flash (она видит картинки)
     if (images && images.length > 0) {
       modelName = "google/gemini-flash-1.5:free"; 
     }
