@@ -5,7 +5,8 @@ import { doc, setDoc } from 'firebase/firestore';
 import { Ionicons } from '@expo/vector-icons';
 import { auth, db } from './firebase';
 import * as ImagePicker from 'expo-image-picker';
-import Markdown from 'react-native-markdown-display'; // <--- Новая библиотека
+import { Audio } from 'expo-av';
+import Markdown from 'react-native-markdown-display';
 
 const API_URL = 'https://stas-gpt.onrender.com';
 
@@ -72,14 +73,14 @@ function AuthScreen() {
 
 // ================= ЭКРАН ЧАТА =================
 function ChatScreen({ user }) {
-  // --- СОСТОЯНИЯ ДЛЯ ИСТОРИИ ЧАТОВ ---
+  // --- ИСТОРИЯ ЧАТОВ ---
   const [chats, setChats] = useState([
     { id: '1', title: 'Новый чат', messages: [{ text: "Привет! Чем могу помочь?", user: false }] }
   ]);
   const [activeChatId, setActiveChatId] = useState('1');
   const [showSidebar, setShowSidebar] = useState(false);
 
-  // --- СОСТОЯНИЯ ДЛЯ ВВОДА ---
+  // --- ВВОД И МОДЕЛИ ---
   const [selectedModel, setSelectedModel] = useState('fast'); 
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -88,6 +89,10 @@ function ChatScreen({ user }) {
   const [showAttachmentMenu, setShowAttachmentMenu] = useState(false);
   const [showModelMenu, setShowModelMenu] = useState(false);
   const scrollRef = useRef();
+
+  // --- ЗАПИСЬ ГОЛОСА ---
+  const [isRecording, setIsRecording] = useState(false);
+  const [recording, setRecording] = useState(null);
 
   const activeChat = chats.find(c => c.id === activeChatId);
   const messages = activeChat ? activeChat.messages : [];
@@ -115,6 +120,33 @@ function ChatScreen({ user }) {
     ));
   };
 
+  // --- ФУНКЦИИ МИКРОФОНА ---
+  async function startRecording() {
+    try {
+      const permission = await Audio.requestPermissionsAsync();
+      if (permission.status === 'granted') {
+        await Audio.setAudioModeAsync({ allowsRecordingIOS: true, playsInSilentModeIOS: true });
+        const { recording } = await Audio.Recording.createAsync(Audio.RecordingOptionsPresets.HIGH_QUALITY);
+        setRecording(recording);
+        setIsRecording(true);
+      } else {
+        Alert.alert('Доступ запрещен', 'Разрешите использование микрофона в настройках телефона.');
+      }
+    } catch (err) {
+      console.error('Failed to start recording', err);
+    }
+  }
+
+  async function stopRecording() {
+    setIsRecording(false);
+    setRecording(undefined);
+    await recording.stopAndUnloadAsync();
+    const uri = recording.getURI();
+    console.log('Аудио сохранено:', uri);
+    Alert.alert('Запись остановлена', 'Функция перевода голоса в текст появится в следующем обновлении!');
+  }
+
+  // --- ВЫБОР ФОТО ---
   const pickImage = async (useCamera = false) => {
     setShowAttachmentMenu(false);
     let result = await (useCamera 
@@ -124,6 +156,7 @@ function ChatScreen({ user }) {
     if (!result.canceled) setImage(result.assets[0].base64);
   };
 
+  // --- ОТПРАВКА СООБЩЕНИЯ ---
   const send = async () => {
     if ((!input.trim() && !image) || isLoading) return;
     
@@ -133,7 +166,6 @@ function ChatScreen({ user }) {
     const newMessages = [...messages, { text: userMsg || "Анализ фото...", image: currentImage, user: true }];
     updateMessages(newMessages);
     
-    // Если это первое сообщение в чате, делаем его заголовком
     if (messages.length === 1 && messages[0].text === "Привет! Чем могу помочь?") {
       setChats(prev => prev.map(c => c.id === activeChatId ? { ...c, title: userMsg.slice(0, 20) || "Фото" } : c));
     }
@@ -192,7 +224,6 @@ function ChatScreen({ user }) {
         {messages.map((m, i) => (
           <View key={i} style={[s.messageWrapper, m.user ? s.userWrapper : s.botWrapper]}>
             {m.image && <Image source={{ uri: `data:image/jpeg;base64,${m.image}` }} style={s.msgImage} />}
-            {/* ВОТ ЗДЕСЬ МЫ ИСПОЛЬЗУЕМ MARKDOWN ДЛЯ ОТВЕТОВ ИИ */}
             {m.user ? (
               <Text style={s.userText}>{m.text}</Text>
             ) : (
@@ -234,8 +265,11 @@ function ChatScreen({ user }) {
             <Ionicons name="chevron-down" size={12} color="#888" style={{marginLeft: 4}} />
           </TouchableOpacity>
 
-          <TouchableOpacity style={s.iconBtnPlain}>
-            <Ionicons name="mic-outline" size={24} color="#fff" />
+          <TouchableOpacity 
+            style={[s.iconBtnPlain, isRecording && { backgroundColor: '#f87171', borderRadius: 19 }]} 
+            onPress={isRecording ? stopRecording : startRecording}
+          >
+            <Ionicons name={isRecording ? "stop" : "mic-outline"} size={24} color="#fff" />
           </TouchableOpacity>
 
           <TouchableOpacity style={[s.sendBtnCircle, (!input.trim() && !image) && {opacity: 0.5}]} onPress={send} disabled={isLoading || (!input.trim() && !image)}>
@@ -244,7 +278,7 @@ function ChatScreen({ user }) {
         </View>
       </View>
 
-      {/* ================= МОДАЛЬНОЕ ОКНО: ИСТОРИЯ ЧАТОВ ================= */}
+      {/* SIDEBAR (ИСТОРИЯ) */}
       <Modal visible={showSidebar} transparent animationType="fade">
         <View style={s.sidebarOverlay}>
           <View style={s.sidebarContent}>
@@ -277,7 +311,7 @@ function ChatScreen({ user }) {
         </View>
       </Modal>
 
-      {/* ================= МОДАЛЬНОЕ ОКНО: ВЛОЖЕНИЯ ================= */}
+      {/* ATTACHMENTS */}
       <Modal visible={showAttachmentMenu} transparent animationType="fade">
         <TouchableOpacity style={s.modalOverlay} activeOpacity={1} onPress={() => setShowAttachmentMenu(false)}>
           <View style={s.floatingMenuLeft}>
@@ -293,7 +327,7 @@ function ChatScreen({ user }) {
         </TouchableOpacity>
       </Modal>
 
-      {/* ================= МОДАЛЬНОЕ ОКНО: ВЫБОР МОДЕЛИ ================= */}
+      {/* MODELS */}
       <Modal visible={showModelMenu} transparent animationType="fade">
         <TouchableOpacity style={s.modalOverlay} activeOpacity={1} onPress={() => setShowModelMenu(false)}>
           <View style={s.floatingMenuBottom}>
@@ -315,7 +349,7 @@ function ChatScreen({ user }) {
   );
 }
 
-// ================= СТИЛИ ДЛЯ MARKDOWN (Текст от ИИ) =================
+// ================= СТИЛИ ДЛЯ MARKDOWN =================
 const markdownStyles = {
   body: { color: '#e0e0e0', fontSize: 16, lineHeight: 24 },
   strong: { fontWeight: 'bold', color: '#fff' },
@@ -332,7 +366,6 @@ const markdownStyles = {
 const s = StyleSheet.create({
   center: { flex: 1, backgroundColor: '#000', justifyContent: 'center', alignItems: 'center' },
   
-  // Авторизация
   authContainer: { flex: 1, backgroundColor: '#000', justifyContent: 'center', padding: 24 },
   titleLogo: { color: '#fff', fontSize: 36, fontWeight: 'bold', textAlign: 'center', marginBottom: 8 },
   subtitle: { color: '#888', fontSize: 18, textAlign: 'center', marginBottom: 32 },
@@ -341,14 +374,12 @@ const s = StyleSheet.create({
   btnText: { color: '#000', fontWeight: 'bold', fontSize: 16 },
   linkText: { color: '#888', textAlign: 'center', marginTop: 20, fontSize: 14 },
 
-  // Основной чат
   container: { flex: 1, backgroundColor: '#000' },
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 15, paddingHorizontal: 15 },
   headerBtn: { padding: 5 },
   headerCenter: { flex: 1, alignItems: 'center', paddingHorizontal: 10 },
   headerTitle: { color: '#fff', fontSize: 18, fontWeight: '600' },
 
-  // Сообщения
   chatArea: { flex: 1, paddingHorizontal: 15 },
   messageWrapper: { padding: 14, marginVertical: 4, maxWidth: '85%' },
   userWrapper: { backgroundColor: '#1c1c1e', alignSelf: 'flex-end', borderRadius: 20, borderBottomRightRadius: 4 },
@@ -356,7 +387,6 @@ const s = StyleSheet.create({
   userText: { color: '#fff', fontSize: 16, lineHeight: 22 },
   msgImage: { width: 220, height: 220, borderRadius: 12, marginBottom: 8 },
 
-  // Панель ввода
   inputContainer: { paddingHorizontal: 12, paddingBottom: Platform.OS === 'ios' ? 10 : 25, paddingTop: 10, backgroundColor: '#000' },
   inputRow: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#1c1c1e', borderRadius: 30, padding: 6, gap: 6 },
   iconBtnSquare: { width: 38, height: 38, borderRadius: 12, backgroundColor: '#2c2c2e', justifyContent: 'center', alignItems: 'center' },
@@ -366,12 +396,10 @@ const s = StyleSheet.create({
   iconBtnPlain: { width: 38, height: 38, justifyContent: 'center', alignItems: 'center' },
   sendBtnCircle: { width: 34, height: 34, borderRadius: 17, backgroundColor: '#fff', justifyContent: 'center', alignItems: 'center' },
 
-  // Превью фото
   previewContainer: { padding: 10, alignSelf: 'flex-start' },
   previewImage: { width: 60, height: 60, borderRadius: 12 },
   removeImageBtn: { position: 'absolute', top: 5, right: 5, backgroundColor: '#333', width: 22, height: 22, borderRadius: 11, justifyContent: 'center', alignItems: 'center', borderWidth: 1, borderColor: '#000' },
 
-  // Боковое меню (Sidebar)
   sidebarOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.7)', flexDirection: 'row' },
   sidebarContent: { width: '75%', backgroundColor: '#111', height: '100%', paddingTop: 50, paddingHorizontal: 15 },
   sidebarHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 },
@@ -382,7 +410,6 @@ const s = StyleSheet.create({
   historyItemActive: { backgroundColor: '#2c2c2e' },
   historyText: { color: '#fff', fontSize: 15, flex: 1 },
 
-  // Плавающие меню
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end' },
   floatingMenuLeft: { backgroundColor: '#1c1c1e', position: 'absolute', bottom: 90, left: 15, borderRadius: 20, paddingVertical: 10, width: 200 },
   menuItem: { flexDirection: 'row', alignItems: 'center', paddingVertical: 14, paddingHorizontal: 20, gap: 15 },
