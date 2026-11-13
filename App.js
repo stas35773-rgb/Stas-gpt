@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { View, Text, TextInput, TouchableOpacity, ScrollView, StyleSheet, Alert, ActivityIndicator, Image, Modal, KeyboardAvoidingView, Platform } from 'react-native';
 import { onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from 'firebase/auth';
+import { Ionicons } from '@expo/vector-icons';
 import { auth } from './firebase';
 import * as ImagePicker from 'expo-image-picker';
 
@@ -18,24 +19,16 @@ export default function App() {
     return unsubscribe;
   }, []);
 
-  if (loading) return <View style={s.center}><ActivityIndicator color="#6ee7b7" size="large" /></View>;
+  if (loading) return <View style={s.center}><ActivityIndicator color="#fff" size="large" /></View>;
   if (!user) return <AuthScreen />;
   return <ChatScreen user={user} />;
 }
 
+// ================= ЭКРАН ВХОДА =================
 function AuthScreen() {
   const [email, setEmail] = useState('');
   const [pass, setPass] = useState('');
   const [mode, setMode] = useState('register');
-  const [lang, setLang] = useState('ru');
-
-  const t = lang === 'ru' ? {
-    reg: "Регистрация", login: "Вход", email: "Почта", pass: "Пароль",
-    btnReg: "Создать аккаунт", btnLogin: "Войти", haveAcc: "Уже есть аккаунт?", noAcc: "Нет аккаунта? Создать"
-  } : {
-    reg: "Registration", login: "Login", email: "Email", pass: "Password",
-    btnReg: "Create account", btnLogin: "Sign in", haveAcc: "Already have an account?", noAcc: "No account? Sign up"
-  };
 
   const handleAuth = async () => {
     if (!email || !pass) return Alert.alert('Ошибка', 'Заполните все поля');
@@ -52,44 +45,40 @@ function AuthScreen() {
 
   return (
     <View style={s.authContainer}>
-      <View style={s.langRow}>
-        <TouchableOpacity onPress={() => setLang('ru')}><Text style={s.lang}>RU</Text></TouchableOpacity>
-        <TouchableOpacity onPress={() => setLang('ro')}><Text style={s.lang}>RO</Text></TouchableOpacity>
-      </View>
       <Text style={s.titleLogo}>Stas GPT</Text>
-      <Text style={s.subtitle}>{mode === 'register' ? t.reg : t.login}</Text>
+      <Text style={s.subtitle}>{mode === 'register' ? "Создать аккаунт" : "Вход"}</Text>
 
-      <TextInput style={s.input} placeholder={t.email} placeholderTextColor="#666" value={email} onChangeText={setEmail} autoCapitalize="none" />
-      <TextInput style={s.input} placeholder={t.pass} placeholderTextColor="#666" value={pass} onChangeText={setPass} secureTextEntry />
+      <TextInput style={s.input} placeholder="Почта" placeholderTextColor="#666" value={email} onChangeText={setEmail} autoCapitalize="none" />
+      <TextInput style={s.input} placeholder="Пароль" placeholderTextColor="#666" value={pass} onChangeText={setPass} secureTextEntry />
 
       <TouchableOpacity style={s.mainBtn} onPress={handleAuth}>
-        <Text style={s.btnText}>{mode === 'register' ? t.btnReg : t.btnLogin}</Text>
+        <Text style={s.btnText}>{mode === 'register' ? "Зарегистрироваться" : "Войти"}</Text>
       </TouchableOpacity>
 
       <TouchableOpacity onPress={() => setMode(mode === 'register' ? 'login' : 'register')}>
-        <Text style={s.linkText}>{mode === 'register' ? t.haveAcc : t.noAcc}</Text>
+        <Text style={s.linkText}>{mode === 'register' ? "Уже есть аккаунт? Войти" : "Нет аккаунта? Создать"}</Text>
       </TouchableOpacity>
     </View>
   );
 }
 
+// ================= ЭКРАН ЧАТА (Интерфейс Grok) =================
 function ChatScreen({ user }) {
   const [selectedModel, setSelectedModel] = useState('fast'); 
-  const [messages, setMessages] = useState([{ text: "Привет! Я Stas GPT. Чем помочь?", user: false }]);
+  const [messages, setMessages] = useState([{ text: "Привет! Чем могу помочь?", user: false }]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [image, setImage] = useState(null);
   
-  // Состояния для модальных окон (меню)
   const [showAttachmentMenu, setShowAttachmentMenu] = useState(false);
   const [showModelMenu, setShowModelMenu] = useState(false);
   const scrollRef = useRef();
 
   const models = [
-    { id: 'beta', name: 'Build (Beta)', desc: 'Создание приложений', icon: '🛠' },
-    { id: 'heavy', name: 'Тяжёлый', desc: 'Группа экспертов', icon: '🧠' },
-    { id: 'expert', name: 'Эксперт', desc: 'Глубокое размышление', icon: '💡' },
-    { id: 'fast', name: 'Быстрый', desc: 'Быстрые ответы', icon: '⚡' }
+    { id: 'beta', name: 'Build', desc: 'Создание приложений', icon: 'construct-outline' },
+    { id: 'heavy', name: 'Тяжёлый', desc: 'Группа экспертов', icon: 'people-outline' },
+    { id: 'expert', name: 'Эксперт', desc: 'Глубокое размышление', icon: 'bulb-outline' },
+    { id: 'fast', name: 'Быстрый', desc: 'Быстрые ответы', icon: 'flash-outline' },
   ];
 
   const pickImage = async (useCamera = false) => {
@@ -113,7 +102,7 @@ function ChatScreen({ user }) {
     setIsLoading(true);
     setTimeout(() => scrollRef.current?.scrollToEnd(), 100);
 
-    // Преобразуем выбранную модель в формат, который понимает наш сервер
+    // Отправляем на сервер
     const backendModel = (selectedModel === 'fast' || selectedModel === 'beta') ? 'beta' : 'v1';
 
     try {
@@ -144,45 +133,43 @@ function ChatScreen({ user }) {
 
   return (
     <KeyboardAvoidingView style={s.container} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-      {/* HEADER */}
+      
+      {/* HEADER (Шапка) */}
       <View style={s.header}>
-        <View style={{flexDirection: 'row', alignItems: 'center', gap: 15}}>
-          <TouchableOpacity><Text style={{fontSize: 24, color: '#fff'}}>☰</Text></TouchableOpacity>
-          <View style={{flexDirection: 'row', alignItems: 'center', gap: 10}}>
-             <View style={s.avatarCircle}><Text style={{fontSize: 20}}>👤</Text></View>
-             <Text style={s.headerTitle}>stas maxim</Text>
-          </View>
+        <TouchableOpacity><Ionicons name="menu" size={28} color="#fff" /></TouchableOpacity>
+        <View style={s.headerCenter}>
+           <View style={s.avatarCircle}><Ionicons name="person" size={18} color="#fff" /></View>
+           <Text style={s.headerTitle}>stas maxim</Text>
         </View>
-        <TouchableOpacity onPress={() => signOut(auth)}><Text style={s.logout}>&gt;&gt;</Text></TouchableOpacity>
+        <TouchableOpacity onPress={() => signOut(auth)}><Ionicons name="chevron-forward-double" size={24} color="#fff" /></TouchableOpacity>
       </View>
 
-      {/* CHAT AREA */}
-      <ScrollView ref={scrollRef} style={s.chatArea} contentContainerStyle={{paddingBottom: 20}}>
+      {/* CHAT AREA (Сообщения) */}
+      <ScrollView ref={scrollRef} style={s.chatArea} contentContainerStyle={{paddingBottom: 20, paddingTop: 10}}>
         {messages.map((m, i) => (
-          <View key={i} style={[s.bubble, m.user ? s.userBubble : s.botBubble]}>
+          <View key={i} style={[s.messageWrapper, m.user ? s.userWrapper : s.botWrapper]}>
             {m.image && <Image source={{ uri: `data:image/jpeg;base64,${m.image}` }} style={s.msgImage} />}
-            <Text style={{ color: '#fff', fontSize: 16 }}>{m.text}</Text>
+            <Text style={m.user ? s.userText : s.botText}>{m.text}</Text>
           </View>
         ))}
-        {isLoading && <ActivityIndicator color="#6ee7b7" style={{ marginTop: 10 }} />}
+        {isLoading && <ActivityIndicator color="#888" style={{ marginTop: 10, alignSelf: 'flex-start', marginLeft: 20 }} />}
       </ScrollView>
 
-      {/* INPUT AREA */}
+      {/* INPUT AREA (Нижняя панель) */}
       <View style={s.inputContainer}>
-        {/* Прикрепленное фото */}
         {image && (
           <View style={s.previewContainer}>
             <Image source={{ uri: `data:image/jpeg;base64,${image}` }} style={s.previewImage} />
             <TouchableOpacity onPress={() => setImage(null)} style={s.removeImageBtn}>
-              <Text style={{ color: '#fff', fontSize: 12 }}>✕</Text>
+              <Ionicons name="close" size={14} color="#fff" />
             </TouchableOpacity>
           </View>
         )}
 
         <View style={s.inputRow}>
-          {/* Кнопка Плюс (Вложения) */}
+          {/* Кнопка Плюс */}
           <TouchableOpacity style={s.iconBtnCircle} onPress={() => setShowAttachmentMenu(true)}>
-            <Text style={s.iconBtnText}>+</Text>
+            <Ionicons name="add" size={24} color="#fff" />
           </TouchableOpacity>
 
           {/* Поле ввода */}
@@ -197,18 +184,19 @@ function ChatScreen({ user }) {
 
           {/* Кнопка Модели */}
           <TouchableOpacity style={s.modelSelectorBtn} onPress={() => setShowModelMenu(true)}>
-            <Text style={s.modelSelectorText}>{currentModelObj.icon} {currentModelObj.name.split(' ')[0]}</Text>
-            <Text style={{color: '#888', fontSize: 10}}>▼</Text>
+            <Ionicons name={currentModelObj.icon} size={14} color="#fff" style={{marginRight: 4}} />
+            <Text style={s.modelSelectorText}>{currentModelObj.name.split(' ')[0]}</Text>
+            <Ionicons name="chevron-down" size={12} color="#888" style={{marginLeft: 4}} />
           </TouchableOpacity>
 
-          {/* Кнопка Голоса (заглушка) */}
-          <TouchableOpacity style={s.iconBtnCircle}>
-            <Text style={{fontSize: 18}}>🎤</Text>
+          {/* Кнопка Микрофона */}
+          <TouchableOpacity style={s.iconBtnPlain}>
+            <Ionicons name="mic-outline" size={22} color="#fff" />
           </TouchableOpacity>
 
           {/* Кнопка Отправить */}
           <TouchableOpacity style={[s.sendBtnCircle, (!input.trim() && !image) && {opacity: 0.5}]} onPress={send} disabled={isLoading || (!input.trim() && !image)}>
-            <Text style={{fontSize: 18}}>➤</Text>
+            <Ionicons name="arrow-up" size={20} color="#000" />
           </TouchableOpacity>
         </View>
       </View>
@@ -218,21 +206,25 @@ function ChatScreen({ user }) {
         <TouchableOpacity style={s.modalOverlay} activeOpacity={1} onPress={() => setShowAttachmentMenu(false)}>
           <View style={s.floatingMenuLeft}>
             <TouchableOpacity style={s.menuItem} onPress={() => pickImage(true)}>
-              <Text style={s.menuItemIcon}>📸</Text>
+              <Ionicons name="camera-outline" size={22} color="#fff" style={s.menuIcon} />
               <Text style={s.menuItemText}>Камера</Text>
             </TouchableOpacity>
             <TouchableOpacity style={s.menuItem} onPress={() => pickImage(false)}>
-              <Text style={s.menuItemIcon}>🖼</Text>
+              <Ionicons name="image-outline" size={22} color="#fff" style={s.menuIcon} />
               <Text style={s.menuItemText}>Галерея</Text>
             </TouchableOpacity>
             <TouchableOpacity style={s.menuItem}>
-              <Text style={s.menuItemIcon}>📁</Text>
+              <Ionicons name="document-outline" size={22} color="#fff" style={s.menuIcon} />
               <Text style={s.menuItemText}>Файлы</Text>
             </TouchableOpacity>
             <View style={s.menuDivider} />
             <TouchableOpacity style={s.menuItem}>
-              <Text style={s.menuItemIcon}>🧩</Text>
+              <Ionicons name="apps-outline" size={22} color="#fff" style={s.menuIcon} />
               <Text style={s.menuItemText}>Навыки</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={s.menuItem}>
+              <Ionicons name="grid-outline" size={22} color="#fff" style={s.menuIcon} />
+              <Text style={s.menuItemText}>Коннекторы</Text>
             </TouchableOpacity>
           </View>
         </TouchableOpacity>
@@ -242,15 +234,14 @@ function ChatScreen({ user }) {
       <Modal visible={showModelMenu} transparent animationType="fade">
         <TouchableOpacity style={s.modalOverlay} activeOpacity={1} onPress={() => setShowModelMenu(false)}>
           <View style={s.floatingMenuBottom}>
-            <Text style={s.menuHeader}>Выберите модель</Text>
             {models.map((m) => (
               <TouchableOpacity key={m.id} style={s.modelMenuItem} onPress={() => { setSelectedModel(m.id); setShowModelMenu(false); }}>
-                <Text style={s.menuItemIcon}>{m.icon}</Text>
+                <Ionicons name={m.icon} size={24} color="#fff" style={s.menuIcon} />
                 <View style={{flex: 1}}>
                   <Text style={s.modelMenuTitle}>{m.name}</Text>
                   <Text style={s.modelMenuDesc}>{m.desc}</Text>
                 </View>
-                {selectedModel === m.id && <Text style={{color: '#6ee7b7', fontSize: 18}}>✓</Text>}
+                {selectedModel === m.id && <Ionicons name="checkmark" size={20} color="#fff" />}
               </TouchableOpacity>
             ))}
           </View>
@@ -261,60 +252,61 @@ function ChatScreen({ user }) {
   );
 }
 
+// ================= СТИЛИ =================
 const s = StyleSheet.create({
-  center: { flex: 1, backgroundColor: '#0f1115', justifyContent: 'center', alignItems: 'center' },
+  center: { flex: 1, backgroundColor: '#000', justifyContent: 'center', alignItems: 'center' },
   
-  // Экран авторизации
-  authContainer: { flex: 1, backgroundColor: '#0f1115', justifyContent: 'center', padding: 24 },
-  langRow: { flexDirection: 'row', gap: 16, position: 'absolute', top: 50, right: 24 },
-  lang: { color: '#6ee7b7', fontSize: 16, fontWeight: 'bold' },
-  titleLogo: { color: '#6ee7b7', fontSize: 36, fontWeight: 'bold', textAlign: 'center', marginBottom: 8 },
-  subtitle: { color: '#fff', fontSize: 18, textAlign: 'center', marginBottom: 32 },
-  input: { backgroundColor: '#20242c', color: '#fff', padding: 16, borderRadius: 12, marginBottom: 12 },
-  mainBtn: { backgroundColor: '#6ee7b7', padding: 16, borderRadius: 12, alignItems: 'center', marginTop: 8 },
-  btnText: { color: '#0f1115', fontWeight: 'bold', fontSize: 16 },
-  linkText: { color: '#8b93a1', textAlign: 'center', marginTop: 20 },
+  // Авторизация
+  authContainer: { flex: 1, backgroundColor: '#000', justifyContent: 'center', padding: 24 },
+  titleLogo: { color: '#fff', fontSize: 36, fontWeight: 'bold', textAlign: 'center', marginBottom: 8 },
+  subtitle: { color: '#888', fontSize: 18, textAlign: 'center', marginBottom: 32 },
+  input: { backgroundColor: '#1c1c1e', color: '#fff', padding: 16, borderRadius: 16, marginBottom: 12, fontSize: 16 },
+  mainBtn: { backgroundColor: '#fff', padding: 16, borderRadius: 16, alignItems: 'center', marginTop: 8 },
+  btnText: { color: '#000', fontWeight: 'bold', fontSize: 16 },
+  linkText: { color: '#888', textAlign: 'center', marginTop: 20, fontSize: 14 },
 
-  // Чат (Основной интерфейс)
-  container: { flex: 1, backgroundColor: '#000000' }, // Черный фон как на скрине
-  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingTop: 50, paddingBottom: 15, paddingHorizontal: 20, backgroundColor: '#000' },
-  avatarCircle: { width: 36, height: 36, borderRadius: 18, backgroundColor: '#222', justifyContent: 'center', alignItems: 'center' },
+  // Чат (Основной)
+  container: { flex: 1, backgroundColor: '#000' },
+  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingTop: 60, paddingBottom: 15, paddingHorizontal: 20 },
+  headerCenter: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  avatarCircle: { width: 32, height: 32, borderRadius: 16, backgroundColor: '#333', justifyContent: 'center', alignItems: 'center' },
   headerTitle: { color: '#fff', fontSize: 18, fontWeight: '600' },
-  logout: { color: '#fff', fontSize: 20, fontWeight: 'bold' },
   
+  // Сообщения
   chatArea: { flex: 1, paddingHorizontal: 15 },
-  bubble: { padding: 14, borderRadius: 20, marginVertical: 6, maxWidth: '85%' },
-  userBubble: { backgroundColor: '#1f6feb', alignSelf: 'flex-end', borderBottomRightRadius: 4 },
-  botBubble: { backgroundColor: '#1c1c1e', alignSelf: 'flex-start', borderBottomLeftRadius: 4 },
+  messageWrapper: { padding: 14, marginVertical: 4, maxWidth: '85%' },
+  userWrapper: { backgroundColor: '#1c1c1e', alignSelf: 'flex-end', borderRadius: 20, borderBottomRightRadius: 4 },
+  botWrapper: { backgroundColor: 'transparent', alignSelf: 'flex-start', paddingHorizontal: 5 },
+  userText: { color: '#fff', fontSize: 16, lineHeight: 22 },
+  botText: { color: '#e0e0e0', fontSize: 16, lineHeight: 24 },
   msgImage: { width: 220, height: 220, borderRadius: 12, marginBottom: 8 },
 
-  // Нижняя панель ввода
-  inputContainer: { paddingHorizontal: 10, paddingBottom: 20, backgroundColor: '#000' },
-  inputRow: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#1c1c1e', borderRadius: 30, padding: 6, gap: 8 },
-  iconBtnCircle: { width: 40, height: 40, borderRadius: 20, backgroundColor: '#2c2c2e', justifyContent: 'center', alignItems: 'center' },
-  iconBtnText: { color: '#fff', fontSize: 24, fontWeight: '300' },
-  textInput: { flex: 1, color: '#fff', fontSize: 16, maxHeight: 100, paddingVertical: 8 },
-  modelSelectorBtn: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#2c2c2e', paddingHorizontal: 12, paddingVertical: 8, borderRadius: 20, gap: 4 },
-  modelSelectorText: { color: '#fff', fontSize: 13, fontWeight: '600' },
-  sendBtnCircle: { width: 40, height: 40, borderRadius: 20, backgroundColor: '#fff', justifyContent: 'center', alignItems: 'center' },
+  // Панель ввода
+  inputContainer: { paddingHorizontal: 12, paddingBottom: 25, paddingTop: 10, backgroundColor: '#000' },
+  inputRow: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#1c1c1e', borderRadius: 30, padding: 6, gap: 6 },
+  iconBtnCircle: { width: 38, height: 38, borderRadius: 19, backgroundColor: '#2c2c2e', justifyContent: 'center', alignItems: 'center' },
+  iconBtnPlain: { width: 38, height: 38, justifyContent: 'center', alignItems: 'center' },
+  textInput: { flex: 1, color: '#fff', fontSize: 16, maxHeight: 100, paddingVertical: 8, paddingHorizontal: 5 },
+  modelSelectorBtn: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 8, paddingVertical: 6 },
+  modelSelectorText: { color: '#fff', fontSize: 14, fontWeight: '500' },
+  sendBtnCircle: { width: 34, height: 34, borderRadius: 17, backgroundColor: '#fff', justifyContent: 'center', alignItems: 'center' },
 
-  // Превью фото перед отправкой
+  // Превью фото
   previewContainer: { padding: 10, alignSelf: 'flex-start' },
-  previewImage: { width: 60, height: 60, borderRadius: 10 },
-  removeImageBtn: { position: 'absolute', top: 5, right: 5, backgroundColor: 'rgba(0,0,0,0.6)', width: 20, height: 20, borderRadius: 10, justifyContent: 'center', alignItems: 'center' },
+  previewImage: { width: 60, height: 60, borderRadius: 12 },
+  removeImageBtn: { position: 'absolute', top: 5, right: 5, backgroundColor: '#333', width: 22, height: 22, borderRadius: 11, justifyContent: 'center', alignItems: 'center', borderWidth: 1, borderColor: '#000' },
 
-  // Модальные окна и плавающие меню
-  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'flex-end' },
+  // Модальные окна
+  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', justifyContent: 'flex-end' },
   
-  floatingMenuLeft: { backgroundColor: '#2c2c2e', position: 'absolute', bottom: 90, left: 20, borderRadius: 20, padding: 10, width: 180, shadowColor: '#000', shadowOffset: { width: 0, height: 5 }, shadowOpacity: 0.5, shadowRadius: 10, elevation: 10 },
-  menuItem: { flexDirection: 'row', alignItems: 'center', paddingVertical: 12, paddingHorizontal: 15, gap: 15 },
-  menuItemIcon: { fontSize: 18, color: '#fff' },
+  floatingMenuLeft: { backgroundColor: '#1c1c1e', position: 'absolute', bottom: 100, left: 15, borderRadius: 20, paddingVertical: 10, width: 200, shadowColor: '#000', shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.5, shadowRadius: 20, elevation: 10 },
+  menuItem: { flexDirection: 'row', alignItems: 'center', paddingVertical: 14, paddingHorizontal: 20, gap: 15 },
+  menuIcon: { marginRight: 5 },
   menuItemText: { color: '#fff', fontSize: 16, fontWeight: '500' },
-  menuDivider: { height: 1, backgroundColor: '#3a3a3c', marginVertical: 5 },
+  menuDivider: { height: 1, backgroundColor: '#333', marginVertical: 5, marginHorizontal: 15 },
 
-  floatingMenuBottom: { backgroundColor: '#2c2c2e', position: 'absolute', bottom: 80, right: 20, left: 20, borderRadius: 20, padding: 15, shadowColor: '#000', shadowOffset: { width: 0, height: 5 }, shadowOpacity: 0.5, shadowRadius: 10, elevation: 10 },
-  menuHeader: { color: '#888', fontSize: 12, fontWeight: 'bold', textTransform: 'uppercase', marginBottom: 10, marginLeft: 10 },
-  modelMenuItem: { flexDirection: 'row', alignItems: 'center', paddingVertical: 12, paddingHorizontal: 10, gap: 15, borderRadius: 12 },
+  floatingMenuBottom: { backgroundColor: '#1c1c1e', position: 'absolute', bottom: 90, right: 15, left: 15, borderRadius: 24, padding: 10, shadowColor: '#000', shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.5, shadowRadius: 20, elevation: 10 },
+  modelMenuItem: { flexDirection: 'row', alignItems: 'center', paddingVertical: 14, paddingHorizontal: 15, gap: 15, borderRadius: 16 },
   modelMenuTitle: { color: '#fff', fontSize: 16, fontWeight: '600' },
   modelMenuDesc: { color: '#888', fontSize: 13, marginTop: 2 },
 });
