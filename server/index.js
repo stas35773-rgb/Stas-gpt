@@ -16,11 +16,10 @@ app.post('/api/chat', async (req, res) => {
     const { message, images, model } = req.body;
     const isV1 = model === 'v1';
     
-    // Надежные бесплатные модели OpenRouter
-    // Microsoft Phi-3 (быстрая) и Zephyr (для сложных задач)
-    let modelName = isV1 ? "huggingfaceh4/zephyr-7b-beta:free" : "microsoft/phi-3-mini-128k-instruct:free"; 
+    // Актуальные бесплатные модели OpenRouter
+    let modelName = isV1 ? "google/gemma-2-9b-it:free" : "mistralai/mistral-7b-instruct:free"; 
     
-    // Если есть фото, используем модель от Meta (Llama 3.2 Vision), она бесплатна на OpenRouter
+    // Для фото используем зрячую Llama 3.2
     if (images && images.length > 0) {
       modelName = "meta-llama/llama-3.2-11b-vision-instruct:free"; 
     }
