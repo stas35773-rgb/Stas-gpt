@@ -1,5 +1,6 @@
 {
   "expo": {
+    "owner": "stas-gpts",
     "name": "Stas GPT",
     "slug": "stas-gpt",
     "version": "1.0.0",
