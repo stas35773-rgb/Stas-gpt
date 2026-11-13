@@ -7,6 +7,11 @@
     "userInterfaceStyle": "dark",
     "android": {
       "package": "com.stasgpt.app"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "8846e172-811a-433f-a24b-73269a2"
+      }
     }
   }
 }
