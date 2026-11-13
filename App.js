@@ -1,3 +1,4 @@
+import { doc, setDoc } from 'firebase/firestore';
 import React, { useEffect, useState, useRef } from 'react';
 import { View, Text, TextInput, TouchableOpacity, ScrollView, StyleSheet, Alert, ActivityIndicator, Image, Modal, KeyboardAvoidingView, Platform } from 'react-native';
 import { onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from 'firebase/auth';
@@ -31,17 +32,25 @@ function AuthScreen() {
   const [mode, setMode] = useState('register');
 
   const handleAuth = async () => {
-    if (!email || !pass) return Alert.alert('Ошибка', 'Заполните все поля');
-    try {
-      if (mode === 'register') {
-        await createUserWithEmailAndPassword(auth, email, pass);
-      } else {
-        await signInWithEmailAndPassword(auth, email, pass);
-      }
-    } catch (e) {
-      Alert.alert('Ошибка', e.message);
+  if (!email || !pass) return Alert.alert('Ошибка', 'Заполните все поля');
+  try {
+    if (mode === 'register') {
+      // Создаем аккаунт
+      const userCred = await createUserWithEmailAndPassword(auth, email, pass);
+      // Сохраняем в базу данных с ролью "user"
+      await setDoc(doc(db, "users", userCred.user.uid), {
+        email: email,
+        role: "user",
+        blocked: false,
+        createdAt: new Date().toISOString()
+      });
+    } else {
+      await signInWithEmailAndPassword(auth, email, pass);
     }
-  };
+  } catch (e) {
+    Alert.alert('Ошибка', e.message);
+  }
+};
 
   return (
     <View style={s.authContainer}>
