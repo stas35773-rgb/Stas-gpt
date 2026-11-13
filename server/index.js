@@ -6,7 +6,6 @@ const app = express();
 app.use(cors());
 app.use(express.json({ limit: '50mb' }));
 
-// Подключение к OpenRouter
 const openai = new OpenAI({ 
   baseURL: "https://openrouter.ai/api/v1",
   apiKey: process.env.OPENROUTER_API_KEY
@@ -17,13 +16,12 @@ app.post('/api/chat', async (req, res) => {
     const { message, images, model } = req.body;
     const isV1 = model === 'v1';
     
-    // Выбираем модель Claude
-    // Если ID не сработает, скопируй точный ID модели на сайте OpenRouter
-    let modelName = isV1 ? "anthropic/claude-sonnet-5" : "anthropic/claude-haiku-5.5"; 
+    // БЕСПЛАТНЫЕ МОДЕЛИ OpenRouter (с припиской :free)
+    let modelName = isV1 ? "google/gemini-flash-1.5:free" : "meta-llama/llama-3-8b-instruct:free"; 
     
-    // Если пользователь прислал фото, используем Sonnet (она умеет "видеть")
+    // Если есть фото, берем бесплатную модель, которая видит картинки
     if (images && images.length > 0) {
-      modelName = "anthropic/claude-sonnet-5"; 
+      modelName = "google/gemini-flash-1.5:free"; 
     }
 
     const messages = [
