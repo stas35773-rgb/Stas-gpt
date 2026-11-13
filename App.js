@@ -10,7 +10,6 @@ import Markdown from 'react-native-markdown-display';
 
 const API_URL = 'https://stas-gpt.onrender.com';
 
-// --- СЛОВАРИ ПЕРЕВОДОВ ---
 const translations = {
   en: {
     appName: 'Stas GPT', login: 'Login', register: 'Register', email: 'Email', password: 'Password',
@@ -33,8 +32,7 @@ const translations = {
 export default function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [lang, setLang] = useState('en'); // Язык по умолчанию - английский
-
+  const [lang, setLang] = useState('en');
   const t = translations[lang];
 
   useEffect(() => {
@@ -50,7 +48,6 @@ export default function App() {
   return <ChatScreen user={user} lang={lang} setLang={setLang} t={t} />;
 }
 
-// ================= ЭКРАН ВХОДА =================
 function AuthScreen({ lang, setLang, t }) {
   const [email, setEmail] = useState('');
   const [pass, setPass] = useState('');
@@ -67,9 +64,7 @@ function AuthScreen({ lang, setLang, t }) {
       } else {
         await signInWithEmailAndPassword(auth, email, pass);
       }
-    } catch (e) {
-      Alert.alert('Error', e.message);
-    }
+    } catch (e) { Alert.alert('Error', e.message); }
   };
 
   return (
@@ -78,17 +73,13 @@ function AuthScreen({ lang, setLang, t }) {
         <TouchableOpacity onPress={() => setLang('en')}><Text style={[s.langText, lang === 'en' && s.langActive]}>EN</Text></TouchableOpacity>
         <TouchableOpacity onPress={() => setLang('ro')}><Text style={[s.langText, lang === 'ro' && s.langActive]}>RO</Text></TouchableOpacity>
       </View>
-
       <Text style={s.titleLogo}>{t.appName}</Text>
       <Text style={s.subtitle}>{mode === 'register' ? t.register : t.login}</Text>
-
       <TextInput style={s.input} placeholder={t.email} placeholderTextColor="#666" value={email} onChangeText={setEmail} autoCapitalize="none" />
       <TextInput style={s.input} placeholder={t.password} placeholderTextColor="#666" value={pass} onChangeText={setPass} secureTextEntry />
-
       <TouchableOpacity style={s.mainBtn} onPress={handleAuth}>
         <Text style={s.btnText}>{mode === 'register' ? t.createAcc : t.signIn}</Text>
       </TouchableOpacity>
-
       <TouchableOpacity onPress={() => setMode(mode === 'register' ? 'login' : 'register')}>
         <Text style={s.linkText}>{mode === 'register' ? t.haveAcc : t.noAcc}</Text>
       </TouchableOpacity>
@@ -96,33 +87,23 @@ function AuthScreen({ lang, setLang, t }) {
   );
 }
 
-// ================= ЭКРАН ЧАТА =================
 function ChatScreen({ user, lang, setLang, t }) {
-  const [chats, setChats] = useState([
-    { id: '1', title: t.newChat, messages: [{ text: t.hello, user: false }] }
-  ]);
+  const [chats, setChats] = useState([{ id: '1', title: t.newChat, messages: [{ text: t.hello, user: false }] }]);
   const [activeChatId, setActiveChatId] = useState('1');
-  
-  // Модальные окна
   const [showSidebar, setShowSidebar] = useState(false);
-  const [showSettings, setShowSettings] = useState(false); // Окно настроек
-
+  const [showSettings, setShowSettings] = useState(false);
   const [selectedModel, setSelectedModel] = useState('fast'); 
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [image, setImage] = useState(null);
   const [showAttachmentMenu, setShowAttachmentMenu] = useState(false);
   const [showModelMenu, setShowModelMenu] = useState(false);
-  
-  // Микрофон
   const [isRecording, setIsRecording] = useState(false);
   const [recording, setRecording] = useState(null);
-
   const scrollRef = useRef();
 
   const activeChat = chats.find(c => c.id === activeChatId);
   const messages = activeChat ? activeChat.messages : [];
-
   const models = [
     { id: 'beta', name: t.build, desc: t.buildDesc, icon: 'construct-outline' },
     { id: 'heavy', name: t.heavy, desc: t.heavyDesc, icon: 'people-outline' },
@@ -190,19 +171,16 @@ function ChatScreen({ user, lang, setLang, t }) {
     }
     setIsLoading(false); setTimeout(() => scrollRef.current?.scrollToEnd(), 100);
   };
-
+  
   const currentModelObj = models.find(m => m.id === selectedModel) || models[3];
 
   return (
     <SafeAreaView style={s.container}>
-      {/* HEADER */}
       <View style={s.header}>
         <TouchableOpacity style={s.headerBtn} onPress={() => setShowSidebar(true)}><Ionicons name="menu" size={28} color="#fff" /></TouchableOpacity>
         <View style={s.headerCenter}><Text style={s.headerTitle} numberOfLines={1}>{activeChat?.title}</Text></View>
-        <View style={{width: 40}} /> {/* Пустое место для баланса */}
+        <View style={{width: 40}} />
       </View>
-
-      {/* CHAT AREA */}
       <ScrollView ref={scrollRef} style={s.chatArea} contentContainerStyle={{paddingBottom: 20, paddingTop: 10}}>
         {messages.map((m, i) => (
           <View key={i} style={[s.messageWrapper, m.user ? s.userWrapper : s.botWrapper]}>
@@ -212,8 +190,6 @@ function ChatScreen({ user, lang, setLang, t }) {
         ))}
         {isLoading && <ActivityIndicator color="#888" style={{ marginTop: 10, alignSelf: 'flex-start', marginLeft: 20 }} />}
       </ScrollView>
-
-      {/* INPUT AREA */}
       <View style={s.inputContainer}>
         {image && (
           <View style={s.previewContainer}>
@@ -221,7 +197,6 @@ function ChatScreen({ user, lang, setLang, t }) {
             <TouchableOpacity onPress={() => setImage(null)} style={s.removeImageBtn}><Ionicons name="close" size={14} color="#fff" /></TouchableOpacity>
           </View>
         )}
-
         <View style={s.inputRow}>
           <TouchableOpacity style={s.iconBtnSquare} onPress={() => setShowAttachmentMenu(true)}><Ionicons name="add" size={24} color="#fff" /></TouchableOpacity>
           <TextInput style={s.textInput} value={input} onChangeText={setInput} placeholder={t.ask} placeholderTextColor="#888" multiline />
@@ -238,22 +213,18 @@ function ChatScreen({ user, lang, setLang, t }) {
           </TouchableOpacity>
         </View>
       </View>
-
-      {/* ================= БОКОВОЕ МЕНЮ (ИСТОРИЯ + АККАУНТ) ================= */}
+      
+      {/* SIDEBAR */}
       <Modal visible={showSidebar} transparent animationType="fade">
         <View style={s.sidebarOverlay}>
           <View style={s.sidebarContent}>
-            {/* Верхняя часть с кнопкой закрытия */}
             <View style={s.sidebarHeader}>
               <Text style={s.sidebarTitle}>{t.history}</Text>
               <TouchableOpacity onPress={() => setShowSidebar(false)}><Ionicons name="close" size={24} color="#fff" /></TouchableOpacity>
             </View>
-
             <TouchableOpacity style={s.newChatBtn} onPress={createNewChat}>
               <Ionicons name="add" size={20} color="#000" /><Text style={s.newChatText}>{t.newChat}</Text>
             </TouchableOpacity>
-
-            {/* Список чатов (занимает всё свободное место) */}
             <ScrollView style={{flex: 1}}>
               {chats.map(chat => (
                 <TouchableOpacity key={chat.id} style={[s.historyItem, activeChatId === chat.id && s.historyItemActive]} onPress={() => { setActiveChatId(chat.id); setShowSidebar(false); }}>
@@ -262,8 +233,6 @@ function ChatScreen({ user, lang, setLang, t }) {
                 </TouchableOpacity>
               ))}
             </ScrollView>
-
-            {/* НИЖНЯЯ ЧАСТЬ: АККАУНТ И ШЕСТЕРЕНКА */}
             <View style={s.sidebarFooter}>
               <View style={s.accountInfo}>
                 <View style={s.avatarMini}><Ionicons name="person" size={16} color="#fff" /></View>
@@ -274,12 +243,10 @@ function ChatScreen({ user, lang, setLang, t }) {
               </TouchableOpacity>
             </View>
           </View>
-          
           <TouchableOpacity style={{flex: 1}} onPress={() => setShowSidebar(false)} />
         </View>
       </Modal>
-
-      {/* ================= ОКНО НАСТРОЕК (Язык, Выход) ================= */}
+      {/* SETTINGS */}
       <Modal visible={showSettings} transparent animationType="slide">
         <View style={s.settingsOverlay}>
           <View style={s.settingsContent}>
@@ -287,8 +254,6 @@ function ChatScreen({ user, lang, setLang, t }) {
               <Text style={s.settingsTitle}>{t.settings}</Text>
               <TouchableOpacity onPress={() => setShowSettings(false)}><Ionicons name="close" size={24} color="#fff" /></TouchableOpacity>
             </View>
-
-            {/* Выбор языка */}
             <Text style={s.settingsLabel}>{t.language}</Text>
             <View style={s.langRow}>
               <TouchableOpacity style={[s.langBtn, lang === 'en' && s.langBtnActive]} onPress={() => setLang('en')}>
@@ -298,20 +263,16 @@ function ChatScreen({ user, lang, setLang, t }) {
                 <Text style={[s.langBtnText, lang === 'ro' && {color: '#000'}]}>Română</Text>
               </TouchableOpacity>
             </View>
-
             <View style={s.divider} />
-
-            {/* Выход из аккаунта */}
             <TouchableOpacity style={s.logoutBtn} onPress={() => signOut(auth)}>
               <Ionicons name="log-out-outline" size={22} color="#f87171" />
               <Text style={s.logoutBtnText}>{t.logout}</Text>
             </TouchableOpacity>
-
           </View>
         </View>
       </Modal>
 
-      {/* ================= МОДАЛЬНОЕ ОКНО: ВЛОЖЕНИЯ ================= */}
+      {/* ATTACHMENTS & MODELS */}
       <Modal visible={showAttachmentMenu} transparent animationType="fade">
         <TouchableOpacity style={s.modalOverlay} activeOpacity={1} onPress={() => setShowAttachmentMenu(false)}>
           <View style={s.floatingMenuLeft}>
@@ -324,8 +285,6 @@ function ChatScreen({ user, lang, setLang, t }) {
           </View>
         </TouchableOpacity>
       </Modal>
-
-      {/* ================= МОДАЛЬНОЕ ОКНО: ВЫБОР МОДЕЛИ ================= */}
       <Modal visible={showModelMenu} transparent animationType="fade">
         <TouchableOpacity style={s.modalOverlay} activeOpacity={1} onPress={() => setShowModelMenu(false)}>
           <View style={s.floatingMenuBottom}>
@@ -361,19 +320,56 @@ const s = StyleSheet.create({
   input: { backgroundColor: '#1c1c1e', color: '#fff', padding: 16, borderRadius: 16, marginBottom: 12, fontSize: 16 },
   mainBtn: { backgroundColor: '#fff', padding: 16, borderRadius: 16, alignItems: 'center', marginTop: 8 },
   btnText: { color: '#000', fontWeight: 'bold', fontSize: 16 }, linkText: { color: '#888', textAlign: 'center', marginTop: 20, fontSize: 14 },
-  
   container: { flex: 1, backgroundColor: '#000' },
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 15, paddingHorizontal: 15 },
   headerBtn: { padding: 5 }, headerCenter: { flex: 1, alignItems: 'center', paddingHorizontal: 10 },
   headerTitle: { color: '#fff', fontSize: 18, fontWeight: '600' },
-  
   chatArea: { flex: 1, paddingHorizontal: 15 },
   messageWrapper: { padding: 14, marginVertical: 4, maxWidth: '85%' },
   userWrapper: { backgroundColor: '#1c1c1e', alignSelf: 'flex-end', borderRadius: 20, borderBottomRightRadius: 4 },
   botWrapper: { backgroundColor: 'transparent', alignSelf: 'flex-start', paddingHorizontal: 5 },
   userText: { color: '#fff', fontSize: 16, lineHeight: 22 }, msgImage: { width: 220, height: 220, borderRadius: 12, marginBottom: 8 },
-  
   inputContainer: { paddingHorizontal: 12, paddingBottom: Platform.OS === 'ios' ? 10 : 25, paddingTop: 10, backgroundColor: '#000' },
   inputRow: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#1c1c1e', borderRadius: 30, padding: 6, gap: 6 },
   iconBtnSquare: { width: 38, height: 38, borderRadius: 12, backgroundColor: '#2c2c2e', justifyContent: 'center', alignItems: 'center' },
-  textInput: { flex: 1, color: '#f
+  textInput: { flex: 1, color: '#fff', fontSize: 16, maxHeight: 100, paddingVertical: 8, paddingHorizontal: 5 },
+  modelSelectorBtn: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#2c2c2e', paddingHorizontal: 12, paddingVertical: 8, borderRadius: 20 },
+  modelSelectorText: { color: '#fff', fontSize: 14, fontWeight: '500' }, iconBtnPlain: { width: 38, height: 38, justifyContent: 'center', alignItems: 'center' },
+  sendBtnCircle: { width: 34, height: 34, borderRadius: 17, backgroundColor: '#fff', justifyContent: 'center', alignItems: 'center' },
+  previewContainer: { padding: 10, alignSelf: 'flex-start' }, previewImage: { width: 60, height: 60, borderRadius: 12 },
+  removeImageBtn: { position: 'absolute', top: 5, right: 5, backgroundColor: '#333', width: 22, height: 22, borderRadius: 11, justifyContent: 'center', alignItems: 'center', borderWidth: 1, borderColor: '#000' },
+  sidebarOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.7)', flexDirection: 'row' },
+  sidebarContent: { width: '80%', backgroundColor: '#111', height: '100%', paddingTop: 50, paddingHorizontal: 15, paddingBottom: 20 },
+  sidebarHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 },
+  sidebarTitle: { color: '#fff', fontSize: 20, fontWeight: 'bold' },
+  newChatBtn: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#fff', padding: 12, borderRadius: 12, marginBottom: 20, gap: 8 },
+  newChatText: { color: '#000', fontWeight: 'bold', fontSize: 16 },
+  historyItem: { flexDirection: 'row', alignItems: 'center', paddingVertical: 14, paddingHorizontal: 10, borderRadius: 10, marginBottom: 5 },
+  historyItemActive: { backgroundColor: '#2c2c2e' },
+  historyText: { color: '#fff', fontSize: 15, flex: 1 },
+  sidebarFooter: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', borderTopWidth: 1, borderTopColor: '#333', paddingTop: 15, marginTop: 10 },
+  accountInfo: { flexDirection: 'row', alignItems: 'center', flex: 1 },
+  avatarMini: { width: 30, height: 30, borderRadius: 15, backgroundColor: '#333', justifyContent: 'center', alignItems: 'center', marginRight: 10 },
+  accountEmail: { color: '#fff', fontSize: 14, flex: 1 },
+  settingsOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.8)', justifyContent: 'center', padding: 20 },
+  settingsContent: { backgroundColor: '#1c1c1e', borderRadius: 20, padding: 20 },
+  settingsHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 },
+  settingsTitle: { color: '#fff', fontSize: 22, fontWeight: 'bold' },
+  settingsLabel: { color: '#888', fontSize: 14, marginBottom: 10, textTransform: 'uppercase' },
+  langRow: { flexDirection: 'row', gap: 10, marginBottom: 20 },
+  langBtn: { flex: 1, backgroundColor: '#2c2c2e', padding: 12, borderRadius: 10, alignItems: 'center' },
+  langBtnActive: { backgroundColor: '#fff' },
+  langBtnText: { color: '#fff', fontWeight: 'bold', fontSize: 16 },
+  divider: { height: 1, backgroundColor: '#333', marginBottom: 20 },
+  logoutBtn: { flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(248, 113, 113, 0.1)', padding: 15, borderRadius: 10, gap: 10 },
+  logoutBtnText: { color: '#f87171', fontWeight: 'bold', fontSize: 16 },
+  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end' },
+  floatingMenuLeft: { backgroundColor: '#1c1c1e', position: 'absolute', bottom: 90, left: 15, borderRadius: 20, paddingVertical: 10, width: 200 },
+  menuItem: { flexDirection: 'row', alignItems: 'center', paddingVertical: 14, paddingHorizontal: 20, gap: 15 },
+  menuIcon: { marginRight: 5 },
+  menuItemText: { color: '#fff', fontSize: 16, fontWeight: '500' },
+  floatingMenuBottom: { backgroundColor: '#1c1c1e', position: 'absolute', bottom: 90, right: 15, left: 15, borderRadius: 24, padding: 10 },
+  modelMenuItem: { flexDirection: 'row', alignItems: 'center', paddingVertical: 14, paddingHorizontal: 15, gap: 15, borderRadius: 16 },
+  modelMenuTitle: { color: '#fff', fontSize: 16, fontWeight: '600' },
+  modelMenuDesc: { color: '#888', fontSize: 13, marginTop: 2 },
+});
