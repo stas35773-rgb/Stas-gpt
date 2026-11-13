@@ -16,10 +16,10 @@ app.post('/api/chat', async (req, res) => {
     const { message, images, model } = req.body;
     const isV1 = model === 'v1';
     
-    // Берем модели NVIDIA из твоего скриншота
-    let modelName = isV1 ? "nvidia/nemotron-3-ultra:free" : "nvidia/nemotron-3-ultra:free"; 
+    // Вставляем ТОЧНЫЙ ID модели со скриншота
+    let modelName = "nvidia/nemotron-3-ultra-550b-a55b:free"; 
     
-    // Для фото используем зрячую NVIDIA VL (Vision-Language)
+    // Для фото используем зрячую модель (если она не сработает, мы потом поменяем её ID)
     if (images && images.length > 0) {
       modelName = "nvidia/nemotron-3.5-super-vl:free"; 
     }
@@ -50,4 +50,4 @@ app.post('/api/chat', async (req, res) => {
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`)); 
