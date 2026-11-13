@@ -1,44 +1,52 @@
 const express = require('express');
 const cors = require('cors');
-const { GoogleGenerativeAI } = require('@google/generative-ai');
+const OpenAI = require('openai');
 
 const app = express();
 app.use(cors());
 app.use(express.json({ limit: '50mb' }));
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+const openai = new OpenAI({ 
+  baseURL: "https://openrouter.ai/api/v1",
+  apiKey: process.env.OPENROUTER_API_KEY
+});
 
 app.post('/api/chat', async (req, res) => {
   try {
     const { message, images, model } = req.body;
     const isV1 = model === 'v1';
     
-    // Используем классические стабильные модели
-    let modelName = "gemini-pro"; 
-    if (images && images.length > 0) {
-      modelName = "gemini-pro-vision"; 
-    }
-
-    const geminiModel = genAI.getGenerativeModel({ model: modelName });
-
-    const contentParts = [{ text: message || "Что на фото?" }];
+    // Надежные бесплатные модели OpenRouter
+    // Microsoft Phi-3 (быстрая) и Zephyr (для сложных задач)
+    let modelName = isV1 ? "huggingfaceh4/zephyr-7b-beta:free" : "microsoft/phi-3-mini-128k-instruct:free"; 
     
-    // Добавляем фото, если есть
+    // Если есть фото, используем модель от Meta (Llama 3.2 Vision), она бесплатна на OpenRouter
     if (images && images.length > 0) {
-      images.forEach(imgBase64 => {
-        contentParts.push({
-          inlineData: { data: imgBase64, mimeType: "image/jpeg" }
-        });
-      });
+      modelName = "meta-llama/llama-3.2-11b-vision-instruct:free"; 
     }
 
-    const result = await geminiModel.generateContent(contentParts);
-    const responseText = result.response.text();
+    const messages = [
+      { role: "system", content: isV1 ? "Ты Stas GPT 1.0. Думай долго, исправляй ошибки." : "Ты Stas GPT Beta. Отвечай быстро." }
+    ];
 
-    res.json({ answer: responseText });
+    if (images && images.length > 0) {
+       const content = [{ type: "text", text: message || "Что на фото?" }];
+       images.forEach(img => content.push({ type: "image_url", image_url: { url: `data:image/jpeg;base64,${img}` } }));
+       messages.push({ role: "user", content: content });
+    } else {
+       messages.push({ role: "user", content: message });
+    }
+
+    const response = await openai.chat.completions.create({
+      model: modelName,
+      messages: messages,
+      max_tokens: 1500,
+    });
+
+    res.json({ answer: response.choices[0].message.content });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'Ошибка сервера: ' + error.message });
+    res.status(500).json({ error: 'Ошибка OpenRouter: ' + error.message });
   }
 });
 
