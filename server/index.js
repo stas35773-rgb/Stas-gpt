@@ -16,8 +16,8 @@ app.post('/api/chat', async (req, res) => {
     const { message, images, model } = req.body;
     const isV1 = model === 'v1';
     
-    // Актуальные бесплатные модели OpenRouter
-    let modelName = isV1 ? "google/gemma-2-9b-it:free" : "mistralai/mistral-7b-instruct:free"; 
+    // Актуальные бесплатные модели OpenRouter (Llama 3.1 и Qwen 2)
+    let modelName = isV1 ? "qwen/qwen-2-7b-instruct:free" : "meta-llama/llama-3.1-8b-instruct:free"; 
     
     // Для фото используем зрячую Llama 3.2
     if (images && images.length > 0) {
