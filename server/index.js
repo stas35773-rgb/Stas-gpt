@@ -16,12 +16,12 @@ app.post('/api/chat', async (req, res) => {
     const { message, images, model } = req.body;
     const isV1 = model === 'v1';
     
-    // Актуальные бесплатные модели OpenRouter (Llama 3.1 и Qwen 2)
-    let modelName = isV1 ? "qwen/qwen-2-7b-instruct:free" : "meta-llama/llama-3.1-8b-instruct:free"; 
+    // Берем модели NVIDIA из твоего скриншота
+    let modelName = isV1 ? "nvidia/nemotron-3-ultra:free" : "nvidia/nemotron-3-ultra:free"; 
     
-    // Для фото используем зрячую Llama 3.2
+    // Для фото используем зрячую NVIDIA VL (Vision-Language)
     if (images && images.length > 0) {
-      modelName = "meta-llama/llama-3.2-11b-vision-instruct:free"; 
+      modelName = "nvidia/nemotron-3.5-super-vl:free"; 
     }
 
     const messages = [
