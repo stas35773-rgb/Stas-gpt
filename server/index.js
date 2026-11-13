@@ -13,14 +13,13 @@ app.post('/api/chat', async (req, res) => {
     const { message, images, model } = req.body;
     const isV1 = model === 'v1';
     
-    // 1.5 Pro думает лучше, 1.5 Flash отвечает быстрее
-  const modelName = isV1 ? "gemini-1.5-pro-latest" : "gemini-1.5-flash-latest";
-    const geminiModel = genAI.getGenerativeModel({ 
-      model: modelName,
-      systemInstruction: isV1 
-        ? "Ты Stas GPT 1.0. Думай долго, исправляй ошибки в тексте пользователя." 
-        : "Ты Stas GPT Beta. Отвечай быстро и коротко."
-    });
+    // Используем классические стабильные модели
+    let modelName = "gemini-pro"; 
+    if (images && images.length > 0) {
+      modelName = "gemini-pro-vision"; 
+    }
+
+    const geminiModel = genAI.getGenerativeModel({ model: modelName });
 
     const contentParts = [{ text: message || "Что на фото?" }];
     
