@@ -15,7 +15,7 @@ app.post('/api/chat', async (req, res) => {
   try {
     const { message, images, model, modelString } = req.body;
     
-    let modelName = modelString || "liquidai/lfm3-1.7b:free"; 
+    let modelName = modelString || "nvidia/nemotron-3-ultra-550b-a55b:free";
     if (images && images.length > 0) modelName = "nvidia/nemotron-3.5-super-vl:free"; 
 
     // ГЛАВНОЕ ИЗМЕНЕНИЕ: Просим ИИ не использовать сложные символы
