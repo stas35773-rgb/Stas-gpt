@@ -123,7 +123,7 @@ function ChatScreen({ user, lang, setLang, t }) {
   const [activeChatId, setActiveChatId] = useState('1');
   const [showSidebar, setShowSidebar] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
-  const [selectedModel, setSelectedModel] = useState('nvidia/nemotron-3-ultra-550b-a55b:free');  
+  const [selectedModel, setSelectedModel] = useState('liquidai/lfm3-1.7b:free'); 
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [image, setImage] = useState(null);
@@ -136,11 +136,11 @@ function ChatScreen({ user, lang, setLang, t }) {
   const activeChat = chats.find(c => c.id === activeChatId);
   const messages = activeChat ? activeChat.messages : [];
   const models = [
-  { id: 'nvidia/nemotron-3-ultra-550b-a55b:free', name: 'StasGPT-flash', desc: 'Быстрые ответы', badge: 'Fast' },
+  { id: 'liquidai/lfm3-1.7b:free', name: 'StasGPT-flash', desc: 'Быстрые ответы', badge: 'Fast' },
   { id: 'google/gemma-4-26b-a4b:free', name: 'StasGPT-pro', desc: 'Для сложных ответов', badge: 'Pro' },
-  { id: 'deepseek/deepseek-chat', name: 'StasGPT-smart', desc: 'Ещё сложнее ответы', badge: 'Smart' },
-  { id: 'anthropic/claude-3.5-sonnet', name: 'StasGPT-expert', desc: 'Для тяжелых задач', badge: 'Expert' },
-  { id: 'openai/gpt-4o', name: 'StasGPT-build', desc: 'Для создания приложений', badge: 'Build' },
+  { id: 'thinkingmachines/inkling-2-small:free', name: 'StasGPT-smart', desc: 'Ещё сложнее ответы', badge: 'Smart' },
+  { id: 'nvidia/nemotron-3-ultra-550b-a55b:free', name: 'StasGPT-expert', desc: 'Для тяжелых задач', badge: 'Expert' },
+  { id: 'nvidia/nemotron-3.5-super-vl:free', name: 'StasGPT-build', desc: 'Для создания приложений', badge: 'Build' },
 ];
 
   const createNewChat = () => {
