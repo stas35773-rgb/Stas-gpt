@@ -314,6 +314,14 @@ function ChatScreen({ user, lang, setLang, t }) {
   );
 }
 
+const markdownRules = {
+  text: (node, children, parent, styles) => (
+    <Text key={node.key} style={styles.text} selectable={true}>
+      {node.content}
+    </Text>
+  ),
+};
+                                                                      
 const markdownStyles = { 
   body: { color: '#e0e0e0', fontSize: 16, lineHeight: 24 }, 
   strong: { fontWeight: 'bold', color: '#fff' }, 
