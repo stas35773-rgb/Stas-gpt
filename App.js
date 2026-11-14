@@ -11,37 +11,15 @@ import Markdown from 'react-native-markdown-display';
 const API_URL = 'https://stas-gpt.onrender.com';
 
 const translations = {
-  en: {
-    appName: 'Stas GPT', login: 'Login', register: 'Register', email: 'Email', password: 'Password',
-    signIn: 'Sign In', createAcc: 'Create Account', noAcc: 'No account? Sign up', haveAcc: 'Already have an account? Log in',
-    ask: 'Ask anything...', newChat: 'New Chat', history: 'History', logout: 'Log out',
-    camera: 'Camera', gallery: 'Gallery', build: 'Build', heavy: 'Heavy', expert: 'Expert', fast: 'Fast',
-    buildDesc: 'App building', heavyDesc: 'Expert group', expertDesc: 'Deep thinking', fastDesc: 'Fast answers',
-    hello: 'Hello! How can I help you?', settings: 'Settings', language: 'Language', account: 'Account'
-  },
-  ro: {
-    appName: 'Stas GPT', login: 'Conectare', register: 'Înregistrare', email: 'Email', password: 'Parolă',
-    signIn: 'Conectează-te', createAcc: 'Creează cont', noAcc: 'Nu ai cont? Înregistrează-te', haveAcc: 'Ai deja cont? Conectează-te',
-    ask: 'Întreabă orice...', newChat: 'Chat nou', history: 'Istoric', logout: 'Deconectare',
-    camera: 'Cameră', gallery: 'Galerie', build: 'Build', heavy: 'Greu', expert: 'Expert', fast: 'Rapid',
-    buildDesc: 'Creare aplicații', heavyDesc: 'Grup de experți', expertDesc: 'Gândire profundă', fastDesc: 'Răspunsuri rapide',
-    hello: 'Salut! Cu ce te pot ajuta?', settings: 'Setări', language: 'Limbă', account: 'Cont'
-  },
-  ru: {
-    appName: 'Stas GPT', login: 'Вход', register: 'Регистрация', email: 'Почта', password: 'Пароль',
-    signIn: 'Войти', createAcc: 'Создать аккаунт', noAcc: 'Нет аккаунта? Создать', haveAcc: 'Уже есть аккаунт? Войти',
-    ask: 'Спросить...', newChat: 'Новый чат', history: 'История', logout: 'Выйти',
-    camera: 'Камера', gallery: 'Галерея', build: 'Build', heavy: 'Тяжёлый', expert: 'Эксперт', fast: 'Быстрый',
-    buildDesc: 'Создание приложений', heavyDesc: 'Группа экспертов', expertDesc: 'Глубокое размышление', fastDesc: 'Быстрые ответы',
-    hello: 'Привет! Чем могу помочь?', settings: 'Настройки', language: 'Язык', account: 'Аккаунт'
-  }
+  en: { appName: 'Stas GPT', login: 'Login', register: 'Register', email: 'Email', password: 'Password', signIn: 'Sign In', createAcc: 'Create Account', noAcc: 'No account? Sign up', haveAcc: 'Already have an account? Log in', ask: 'Ask anything...', newChat: 'New Chat', history: 'History', logout: 'Log out', camera: 'Camera', gallery: 'Gallery', build: 'Build', heavy: 'Heavy', expert: 'Expert', fast: 'Fast', buildDesc: 'App building', heavyDesc: 'Expert group', expertDesc: 'Deep thinking', fastDesc: 'Fast answers', hello: 'Hello! How can I help you?', settings: 'Settings', language: 'Language', account: 'Account', verifyTitle: 'Verify Email', verifyText: 'We sent a link to your email. Please click it to verify your account.', checkBtn: 'I Verified, Check Again' },
+  ro: { appName: 'Stas GPT', login: 'Conectare', register: 'Înregistrare', email: 'Email', password: 'Parolă', signIn: 'Conectează-te', createAcc: 'Creează cont', noAcc: 'Nu ai cont? Înregistrează-te', haveAcc: 'Ai deja cont? Conectează-te', ask: 'Întreabă orice...', newChat: 'Chat nou', history: 'Istoric', logout: 'Deconectare', camera: 'Cameră', gallery: 'Galerie', build: 'Build', heavy: 'Greu', expert: 'Expert', fast: 'Rapid', buildDesc: 'Creare aplicații', heavyDesc: 'Grup de experți', expertDesc: 'Gândire profundă', fastDesc: 'Răspunsuri rapide', hello: 'Salut! Cu ce te pot ajuta?', settings: 'Setări', language: 'Limbă', account: 'Cont', verifyTitle: 'Verifică Emailul', verifyText: 'Am trimis un link pe email. Te rugăm să îl accesezi pentru a verifica contul.', checkBtn: 'Am Verificat, Verifică din nou' },
+  ru: { appName: 'Stas GPT', login: 'Вход', register: 'Регистрация', email: 'Почта', password: 'Пароль', signIn: 'Войти', createAcc: 'Создать аккаунт', noAcc: 'Нет аккаунта? Создать', haveAcc: 'Уже есть аккаунт? Войти', ask: 'Спросить...', newChat: 'Новый чат', history: 'История', logout: 'Выйти', camera: 'Камера', gallery: 'Галерея', build: 'Build', heavy: 'Тяжёлый', expert: 'Эксперт', fast: 'Быстрый', buildDesc: 'Создание приложений', heavyDesc: 'Группа экспертов', expertDesc: 'Глубокое размышление', fastDesc: 'Быстрые ответы', hello: 'Привет! Чем могу помочь?', settings: 'Настройки', language: 'Язык', account: 'Аккаунт', verifyTitle: 'Подтвердите почту', verifyText: 'Мы отправили письмо на вашу почту. Перейдите по ссылке из письма, чтобы подтвердить аккаунт.', checkBtn: 'Я подтвердил, проверить' }
 };
 
 export default function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [lang, setLang] = useState('ru'); 
-
   const t = translations[lang];
 
   useEffect(() => {
@@ -61,7 +39,47 @@ export default function App() {
 
   if (loading) return <View style={s.center}><ActivityIndicator color="#fff" size="large" /></View>;
   if (!user) return <AuthScreen lang={lang} setLang={setLang} t={t} />;
+  
+  if (!user.emailVerified) {
+    return <VerifyEmailScreen user={user} setUser={setUser} t={t} />;
+  }
+
   return <ChatScreen user={user} lang={lang} setLang={setLang} t={t} />;
+}
+
+function VerifyEmailScreen({ user, setUser, t }) {
+  const [checking, setChecking] = useState(false);
+
+  const checkVerification = async () => {
+    setChecking(true);
+    try {
+      await auth.currentUser.reload(); 
+      if (auth.currentUser.emailVerified) {
+        setUser({ ...auth.currentUser }); 
+      } else {
+        Alert.alert('Ошибка', 'Почта пока не подтверждена. Проверьте ссылку в письме.');
+      }
+    } catch (e) {
+      Alert.alert('Ошибка', e.message);
+    }
+    setChecking(false);
+  };
+
+  return (
+    <View style={[s.center, { padding: 30 }]}>
+      <Ionicons name="mail-unread-outline" size={80} color="#fbbf24" />
+      <Text style={{ color: '#fff', fontSize: 24, fontWeight: 'bold', marginTop: 20, textAlign: 'center' }}>{t.verifyTitle}</Text>
+      <Text style={{ color: '#888', fontSize: 16, marginTop: 10, textAlign: 'center', marginBottom: 30 }}>
+        {t.verifyText} ({user.email})
+      </Text>
+      <TouchableOpacity style={[s.mainBtn, { width: '100%' }]} onPress={checkVerification} disabled={checking}>
+        <Text style={s.btnText}>{checking ? '...' : t.checkBtn}</Text>
+      </TouchableOpacity>
+      <TouchableOpacity onPress={() => signOut(auth)} style={{ marginTop: 20 }}>
+        <Text style={{ color: '#f87171', fontSize: 16 }}>{t.logout}</Text>
+      </TouchableOpacity>
+    </View>
+  );
 }
 
 function AuthScreen({ lang, setLang, t }) {
@@ -74,16 +92,11 @@ function AuthScreen({ lang, setLang, t }) {
     try {
       if (mode === 'register') {
         const userCred = await createUserWithEmailAndPassword(auth, email, pass);
-        await setDoc(doc(db, "users", userCred.user.uid), {
-          email: email, role: "user", blocked: false, createdAt: new Date().toISOString()
-        });
+        await setDoc(doc(db, "users", userCred.user.uid), { email: email, role: "user", blocked: false, createdAt: new Date().toISOString() });
         await sendEmailVerification(userCred.user);
-        Alert.alert('Успех!', 'Аккаунт создан. Мы отправили письмо на вашу почту. Пожалуйста, перейдите по ссылке в письме для подтверждения.');
+        Alert.alert('Успех!', 'Аккаунт создан. Проверьте почту для подтверждения.');
       } else {
-        const userCred = await signInWithEmailAndPassword(auth, email, pass);
-        if (!userCred.user.emailVerified) {
-          Alert.alert('Внимание', 'Ваша почта не подтверждена! Проверьте входящие письма и перейдите по ссылке из письма.');
-        }
+        await signInWithEmailAndPassword(auth, email, pass);
       }
     } catch (e) { Alert.alert('Ошибка', e.message); }
   };
@@ -99,12 +112,8 @@ function AuthScreen({ lang, setLang, t }) {
       <Text style={s.subtitle}>{mode === 'register' ? t.register : t.login}</Text>
       <TextInput style={s.input} placeholder={t.email} placeholderTextColor="#666" value={email} onChangeText={setEmail} autoCapitalize="none" keyboardType="email-address" />
       <TextInput style={s.input} placeholder={t.password} placeholderTextColor="#666" value={pass} onChangeText={setPass} secureTextEntry />
-      <TouchableOpacity style={s.mainBtn} onPress={handleAuth}>
-        <Text style={s.btnText}>{mode === 'register' ? t.createAcc : t.signIn}</Text>
-      </TouchableOpacity>
-      <TouchableOpacity onPress={() => setMode(mode === 'register' ? 'login' : 'register')}>
-        <Text style={s.linkText}>{mode === 'register' ? t.haveAcc : t.noAcc}</Text>
-      </TouchableOpacity>
+      <TouchableOpacity style={s.mainBtn} onPress={handleAuth}><Text style={s.btnText}>{mode === 'register' ? t.createAcc : t.signIn}</Text></TouchableOpacity>
+      <TouchableOpacity onPress={() => setMode(mode === 'register' ? 'login' : 'register')}><Text style={s.linkText}>{mode === 'register' ? t.haveAcc : t.noAcc}</Text></TouchableOpacity>
     </View>
   );
 }
@@ -140,9 +149,7 @@ function ChatScreen({ user, lang, setLang, t }) {
     setShowSidebar(false);
   };
 
-  const updateMessages = (newMessages) => {
-    setChats(prevChats => prevChats.map(c => c.id === activeChatId ? { ...c, messages: newMessages } : c));
-  };
+  const updateMessages = (newMessages) => setChats(prev => prev.map(c => c.id === activeChatId ? { ...c, messages: newMessages } : c));
 
   async function startRecording() {
     try {
@@ -158,7 +165,7 @@ function ChatScreen({ user, lang, setLang, t }) {
   async function stopRecording() {
     setIsRecording(false); setRecording(undefined);
     await recording.stopAndUnloadAsync();
-    Alert.alert('Voice', 'Speech-to-text coming soon!');
+    setInput(prev => prev + " [Голосовое сообщение] ");
   }
 
   const pickImage = async (useCamera = false) => {
@@ -172,32 +179,20 @@ function ChatScreen({ user, lang, setLang, t }) {
     const userMsg = input; const currentImage = image;
     const newMessages = [...messages, { text: userMsg || "...", image: currentImage, user: true }];
     updateMessages(newMessages);
-    
-    if (messages.length === 1 && messages[0].text === t.hello) {
-      setChats(prev => prev.map(c => c.id === activeChatId ? { ...c, title: userMsg.slice(0, 20) || "Photo" } : c));
-    }
+    if (messages.length === 1 && messages[0].text === t.hello) setChats(prev => prev.map(c => c.id === activeChatId ? { ...c, title: userMsg.slice(0, 20) || "Photo" } : c));
     setInput(''); setImage(null); setIsLoading(true);
     setTimeout(() => scrollRef.current?.scrollToEnd(), 100);
 
     try {
       const response = await fetch(`${API_URL}/api/chat`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: userMsg || "Analyze", images: currentImage ? [currentImage] : [], model: (selectedModel === 'fast' || selectedModel === 'beta') ? 'beta' : 'v1' })
       });
       const data = await response.json();
       const aiAnswer = data.answer || "Error";
       updateMessages([...newMessages, { text: aiAnswer, user: false }]);
-
-      try {
-        await addDoc(collection(db, "messages"), {
-          userId: user.uid, email: user.email, question: userMsg || "[Фото]",
-          answer: aiAnswer, model: selectedModel, createdAt: serverTimestamp()
-        });
-      } catch (err) { console.log(err); }
-    } catch (e) {
-      updateMessages([...newMessages, { text: "Network error: " + e.message, user: false }]);
-    }
+      try { await addDoc(collection(db, "messages"), { userId: user.uid, email: user.email, question: userMsg || "[Фото]", answer: aiAnswer, model: selectedModel, createdAt: serverTimestamp() }); } catch (err) { }
+    } catch (e) { updateMessages([...newMessages, { text: "Network error: " + e.message, user: false }]); }
     setIsLoading(false); setTimeout(() => scrollRef.current?.scrollToEnd(), 100);
   };
 
@@ -249,9 +244,7 @@ function ChatScreen({ user, lang, setLang, t }) {
               <Text style={s.sidebarTitle}>{t.history}</Text>
               <TouchableOpacity onPress={() => setShowSidebar(false)}><Ionicons name="close" size={24} color="#fff" /></TouchableOpacity>
             </View>
-            <TouchableOpacity style={s.newChatBtn} onPress={createNewChat}>
-              <Ionicons name="add" size={20} color="#000" /><Text style={s.newChatText}>{t.newChat}</Text>
-            </TouchableOpacity>
+            <TouchableOpacity style={s.newChatBtn} onPress={createNewChat}><Ionicons name="add" size={20} color="#000" /><Text style={s.newChatText}>{t.newChat}</Text></TouchableOpacity>
             <ScrollView style={{flex: 1}}>
               {chats.map(chat => (
                 <TouchableOpacity key={chat.id} style={[s.historyItem, activeChatId === chat.id && s.historyItemActive]} onPress={() => { setActiveChatId(chat.id); setShowSidebar(false); }}>
@@ -265,9 +258,7 @@ function ChatScreen({ user, lang, setLang, t }) {
                 <View style={s.avatarMini}><Ionicons name="person" size={16} color="#fff" /></View>
                 <Text style={s.accountEmail} numberOfLines={1}>{user.email}</Text>
               </View>
-              <TouchableOpacity onPress={() => { setShowSidebar(false); setShowSettings(true); }} style={{padding: 5}}>
-                <Ionicons name="settings-outline" size={24} color="#fff" />
-              </TouchableOpacity>
+              <TouchableOpacity onPress={() => { setShowSidebar(false); setShowSettings(true); }} style={{padding: 5}}><Ionicons name="settings-outline" size={24} color="#fff" /></TouchableOpacity>
             </View>
           </View>
           <TouchableOpacity style={{flex: 1}} onPress={() => setShowSidebar(false)} />
@@ -283,21 +274,12 @@ function ChatScreen({ user, lang, setLang, t }) {
             </View>
             <Text style={s.settingsLabel}>{t.language}</Text>
             <View style={s.langRow}>
-              <TouchableOpacity style={[s.langBtn, lang === 'en' && s.langBtnActive]} onPress={() => setLang('en')}>
-                <Text style={[s.langBtnText, lang === 'en' && {color: '#000'}]}>EN</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={[s.langBtn, lang === 'ro' && s.langBtnActive]} onPress={() => setLang('ro')}>
-                <Text style={[s.langBtnText, lang === 'ro' && {color: '#000'}]}>RO</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={[s.langBtn, lang === 'ru' && s.langBtnActive]} onPress={() => setLang('ru')}>
-                <Text style={[s.langBtnText, lang === 'ru' && {color: '#000'}]}>RU</Text>
-              </TouchableOpacity>
+              <TouchableOpacity style={[s.langBtn, lang === 'en' && s.langBtnActive]} onPress={() => setLang('en')}><Text style={[s.langBtnText, lang === 'en' && {color: '#000'}]}>EN</Text></TouchableOpacity>
+              <TouchableOpacity style={[s.langBtn, lang === 'ro' && s.langBtnActive]} onPress={() => setLang('ro')}><Text style={[s.langBtnText, lang === 'ro' && {color: '#000'}]}>RO</Text></TouchableOpacity>
+              <TouchableOpacity style={[s.langBtn, lang === 'ru' && s.langBtnActive]} onPress={() => setLang('ru')}><Text style={[s.langBtnText, lang === 'ru' && {color: '#000'}]}>RU</Text></TouchableOpacity>
             </View>
             <View style={s.divider} />
-            <TouchableOpacity style={s.logoutBtn} onPress={() => signOut(auth)}>
-              <Ionicons name="log-out-outline" size={22} color="#f87171" />
-              <Text style={s.logoutBtnText}>{t.logout}</Text>
-            </TouchableOpacity>
+            <TouchableOpacity style={s.logoutBtn} onPress={() => signOut(auth)}><Ionicons name="log-out-outline" size={22} color="#f87171" /><Text style={s.logoutBtnText}>{t.logout}</Text></TouchableOpacity>
           </View>
         </View>
       </Modal>
@@ -305,12 +287,8 @@ function ChatScreen({ user, lang, setLang, t }) {
       <Modal visible={showAttachmentMenu} transparent animationType="fade">
         <TouchableOpacity style={s.modalOverlay} activeOpacity={1} onPress={() => setShowAttachmentMenu(false)}>
           <View style={s.floatingMenuLeft}>
-            <TouchableOpacity style={s.menuItem} onPress={() => pickImage(true)}>
-              <Ionicons name="camera-outline" size={22} color="#fff" style={s.menuIcon} /><Text style={s.menuItemText}>{t.camera}</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={s.menuItem} onPress={() => pickImage(false)}>
-              <Ionicons name="image-outline" size={22} color="#fff" style={s.menuIcon} /><Text style={s.menuItemText}>{t.gallery}</Text>
-            </TouchableOpacity>
+            <TouchableOpacity style={s.menuItem} onPress={() => pickImage(true)}><Ionicons name="camera-outline" size={22} color="#fff" style={s.menuIcon} /><Text style={s.menuItemText}>{t.camera}</Text></TouchableOpacity>
+            <TouchableOpacity style={s.menuItem} onPress={() => pickImage(false)}><Ionicons name="image-outline" size={22} color="#fff" style={s.menuIcon} /><Text style={s.menuItemText}>{t.gallery}</Text></TouchableOpacity>
           </View>
         </TouchableOpacity>
       </Modal>
@@ -332,12 +310,16 @@ function ChatScreen({ user, lang, setLang, t }) {
   );
 }
 
-const markdownStyles = {
-  body: { color: '#e0e0e0', fontSize: 16, lineHeight: 24 }, strong: { fontWeight: 'bold', color: '#fff' },
-  em: { fontStyle: 'italic' }, paragraph: { marginTop: 0, marginBottom: 10 }, link: { color: '#6ee7b7' },
-  code_inline: { backgroundColor: '#2c2c2e', color: '#f87171', paddingHorizontal: 4, borderRadius: 4 },
-  code_block: { backgroundColor: '#1c1c1e', padding: 10, borderRadius: 8, color: '#fff' },
-  fence: { backgroundColor: '#1c1c1e', padding: 10, borderRadius: 8, color: '#fff' }, list_item: { marginBottom: 5 },
+const markdownStyles = { 
+  body: { color: '#e0e0e0', fontSize: 16, lineHeight: 24 }, 
+  strong: { fontWeight: 'bold', color: '#fff' }, 
+  em: { fontStyle: 'normal' }, 
+  paragraph: { marginTop: 0, marginBottom: 10 }, 
+  link: { color: '#6ee7b7' }, 
+  code_inline: { backgroundColor: '#2c2c2e', color: '#f87171', paddingHorizontal: 4, borderRadius: 4 }, 
+  code_block: { backgroundColor: '#1c1c1e', padding: 10, borderRadius: 8, color: '#fff' }, 
+  fence: { backgroundColor: '#1c1c1e', padding: 10, borderRadius: 8, color: '#fff' }, 
+  list_item: { marginBottom: 5 } 
 };
 
 const s = StyleSheet.create({
