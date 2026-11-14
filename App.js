@@ -209,7 +209,11 @@ function ChatScreen({ user, lang, setLang, t }) {
         {messages.map((m, i) => (
           <View key={i} style={[s.messageWrapper, m.user ? s.userWrapper : s.botWrapper]}>
             {m.image && <Image source={{ uri: `data:image/jpeg;base64,${m.image}` }} style={s.msgImage} />}
-            {m.user ? <Text style={s.userText}>{m.text}</Text> : <Markdown style={markdownStyles}>{m.text}</Markdown>}
+            {m.user ? (
+              <Text selectable={true} style={s.userText}>{m.text}</Text>
+            ) : (
+              <Markdown selectable={true} style={markdownStyles}>{m.text}</Markdown>
+            )}
           </View>
         ))}
         {isLoading && <ActivityIndicator color="#888" style={{ marginTop: 10, alignSelf: 'flex-start', marginLeft: 20 }} />}
