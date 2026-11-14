@@ -1,8 +1,8 @@
 {
   "expo": {
-    "owner": "clumsy-moves-team",
+    "owner": "clumsymoves-team",
     "name": "Stas GPT",
-    "slug": "stas-gpt",
+    "slug": "stas-gpt1",
     "version": "1.0.0",
     "orientation": "portrait",
     "userInterfaceStyle": "dark",
@@ -10,7 +10,7 @@
       "backgroundColor": "#0f1115"
     },
     "android": {
-      "package": "com.stasgpt.admin",
+      "package": "com.stasgpt.app",
       "adaptiveIcon": {
         "backgroundColor": "#0f1115"
       }
