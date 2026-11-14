@@ -11,11 +11,34 @@ import Markdown from 'react-native-markdown-display';
 const API_URL = 'https://stas-gpt.onrender.com';
 
 const translations = {
-  en: { appName: 'Stas GPT', login: 'Login', register: 'Register', email: 'Email', password: 'Password', signIn: 'Sign In', createAcc: 'Create Account', noAcc: 'No account? Sign up', haveAcc: 'Already have an account? Log in', ask: 'Ask anything...', newChat: 'New Chat', history: 'History', logout: 'Log out', camera: 'Camera', gallery: 'Gallery', build: 'Build', heavy: 'Heavy', expert: 'Expert', fast: 'Fast', buildDesc: 'App building', heavyDesc: 'Expert group', expertDesc: 'Deep thinking', fastDesc: 'Fast answers', hello: 'Hello! How can I help you?', settings: 'Settings', language: 'Language', account: 'Account', verifyTitle: 'Verify Email', verifyText: 'We sent a link to your email. Please click it to verify your account.', checkBtn: 'I Verified, Check Again' },
-  ro: { appName: 'Stas GPT', login: 'Conectare', register: 'Înregistrare', email: 'Email', password: 'Parolă', signIn: 'Conectează-te', createAcc: 'Creează cont', noAcc: 'Nu ai cont? Înregistrează-te', haveAcc: 'Ai deja cont? Conectează-te', ask: 'Întreabă orice...', newChat: 'Chat nou', history: 'Istoric', logout: 'Deconectare', camera: 'Cameră', gallery: 'Galerie', build: 'Build', heavy: 'Greu', expert: 'Expert', fast: 'Rapid', buildDesc: 'Creare aplicații', heavyDesc: 'Grup de experți', expertDesc: 'Gândire profundă', fastDesc: 'Răspunsuri rapide', hello: 'Salut! Cu ce te pot ajuta?', settings: 'Setări', language: 'Limbă', account: 'Cont', verifyTitle: 'Verifică Emailul', verifyText: 'Am trimis un link pe email. Te rugăm să îl accesezi pentru a verifica contul.', checkBtn: 'Am Verificat, Verifică din nou' },
-  ru: { appName: 'Stas GPT', login: 'Вход', register: 'Регистрация', email: 'Почта', password: 'Пароль', signIn: 'Войти', createAcc: 'Создать аккаунт', noAcc: 'Нет аккаунта? Создать', haveAcc: 'Уже есть аккаунт? Войти', ask: 'Спросить...', newChat: 'Новый чат', history: 'История', logout: 'Выйти', camera: 'Камера', gallery: 'Галерея', build: 'Build', heavy: 'Тяжёлый', expert: 'Эксперт', fast: 'Быстрый', buildDesc: 'Создание приложений', heavyDesc: 'Группа экспертов', expertDesc: 'Глубокое размышление', fastDesc: 'Быстрые ответы', hello: 'Привет! Чем могу помочь?', settings: 'Настройки', language: 'Язык', account: 'Аккаунт', verifyTitle: 'Подтвердите почту', verifyText: 'Мы отправили письмо на вашу почту. Перейдите по ссылке из письма, чтобы подтвердить аккаунт.', checkBtn: 'Я подтвердил, проверить' }
+  en: { 
+    appName: 'Stas GPT', login: 'Login', register: 'Register', email: 'Email', password: 'Password', 
+    signIn: 'Sign In', createAcc: 'Create Account', noAcc: 'No account? Sign up', haveAcc: 'Already have an account? Log in', 
+    ask: 'Ask anything...', newChat: 'New Chat', history: 'History', logout: 'Log out', camera: 'Camera', gallery: 'Gallery', 
+    hello: 'Hello! How can I help you?', settings: 'Settings', language: 'Language', account: 'Account', 
+    verifyTitle: 'Verify Email', verifyText: 'We sent a link to your email. Please click it.', checkBtn: 'I Verified', 
+    modelTitle: 'Select Model', effort: 'Effort Level', 
+    m_flash: 'Fast answers', m_pro: 'For complex answers', m_smart: 'Even smarter answers', m_expert: 'For heavy tasks', m_build: 'For app building'
+  },
+  ro: { 
+    appName: 'Stas GPT', login: 'Conectare', register: 'Înregistrare', email: 'Email', password: 'Parolă', 
+    signIn: 'Conectează-te', createAcc: 'Creează cont', noAcc: 'Nu ai cont? Înregistrează-te', haveAcc: 'Ai deja cont? Conectează-te', 
+    ask: 'Întreabă orice...', newChat: 'Chat nou', history: 'Istoric', logout: 'Deconectare', camera: 'Cameră', gallery: 'Galerie', 
+    hello: 'Salut! Cu ce te pot ajuta?', settings: 'Setări', language: 'Limbă', account: 'Cont', 
+    verifyTitle: 'Verifică Emailul', verifyText: 'Am trimis un link pe email.', checkBtn: 'Am Verificat', 
+    modelTitle: 'Alege Modelul', effort: 'Nivel de efort', 
+    m_flash: 'Răspunsuri rapide', m_pro: 'Pentru răspunsuri complexe', m_smart: 'Răspunsuri și mai deștepte', m_expert: 'Pentru sarcini grele', m_build: 'Pentru crearea aplicațiilor'
+  },
+  ru: { 
+    appName: 'Stas GPT', login: 'Вход', register: 'Регистрация', email: 'Почта', password: 'Пароль', 
+    signIn: 'Войти', createAcc: 'Создать аккаунт', noAcc: 'Нет аккаунта? Создать', haveAcc: 'Уже есть аккаунт? Войти', 
+    ask: 'Спросить...', newChat: 'Новый чат', history: 'История', logout: 'Выйти', camera: 'Камера', gallery: 'Галерея', 
+    hello: 'Привет! Чем могу помочь?', settings: 'Настройки', language: 'Язык', account: 'Аккаунт', 
+    verifyTitle: 'Подтвердите почту', verifyText: 'Мы отправили письмо.', checkBtn: 'Я подтвердил', 
+    modelTitle: 'Выбор модели', effort: 'Уровень усилий', 
+    m_flash: 'Быстрые ответы', m_pro: 'Для сложных ответов', m_smart: 'Ещё сложнее ответы', m_expert: 'Для тяжелых задач', m_build: 'Для создания приложений'
+  }
 };
-
 export default function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
