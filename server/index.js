@@ -13,23 +13,16 @@ const openai = new OpenAI({
 
 app.post('/api/chat', async (req, res) => {
   try {
-    const { message, images, model } = req.body;
-    const isV1 = model === 'v1';
+    const { message, images, model, modelString } = req.body;
     
-    // Рабочие модели NVIDIA
-    let modelName = "nvidia/nemotron-3-ultra-550b-a55b:free"; 
-    
-    if (images && images.length > 0) {
-      modelName = "nvidia/nemotron-3.5-super-vl:free"; 
-    }
+    let modelName = modelString || "liquidai/lfm3-1.7b:free"; 
+    if (images && images.length > 0) modelName = "nvidia/nemotron-3.5-super-vl:free"; 
 
-    // ВОТ ЗДЕСЬ НАХОДИТСЯ НАШ ПРОМПТ (вместо systemInstruction)
+    // ГЛАВНОЕ ИЗМЕНЕНИЕ: Просим ИИ не использовать сложные символы
     const messages = [
       { 
         role: "system", 
-        content: isV1 
-          ? "Ты Stas GPT 1.0. Думай долго, исправляй ошибки. Отвечай с помощью обычного текста. НЕ используй LaTeX (символы $ и $$) для формул, пиши математику обычными символами." 
-          : "Ты Stas GPT Beta. Отвечай быстро. НЕ используй LaTeX (символы $ и $$), пиши математику обычными символами." 
+        content: "Ты Stas GPT. Отвечай на языке пользователя. ВАЖНО: Не используй Markdown (звездочки ** и решетки ###). Пиши математику обычным текстом, используя символы (например, 2² вместо 2^2, или 2*2=4). Делай текст чистым и понятным." 
       }
     ];
 
