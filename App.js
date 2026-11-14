@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { View, Text, TextInput, TouchableOpacity, ScrollView, StyleSheet, Alert, ActivityIndicator, Image, Modal, KeyboardAvoidingView, Platform, SafeAreaView } from 'react-native';
-import { onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from 'firebase/auth';
-import { doc, setDoc, collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, sendEmailVerification } from 'firebase/auth';
+import { doc, setDoc, getDoc, collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { Ionicons } from '@expo/vector-icons';
 import { auth, db } from './firebase';
 import * as ImagePicker from 'expo-image-picker';
@@ -41,12 +41,27 @@ const translations = {
 export default function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [lang, setLang] = useState('ru'); // По умолчанию ставим русский, можете поменять на 'en'
+  const [lang, setLang] = useState('ru'); 
 
   const t = translations[lang];
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (u) => {
+    const unsubscribe = onAuthStateChanged(auth, async (u) => {
+      if (u) {
+        // --- АВТОСОЗДАНИЕ В БАЗЕ ПРИ ВХОДЕ ---
+        const userRef = doc(db, "users", u.uid);
+        const userSnap = await getDoc(userRef);
+        
+        // Если пользователя нет в базе (например, старый аккаунт), создаем его
+        if (!userSnap.exists()) {
+          await setDoc(userRef, {
+            email: u.email,
+            role: "user",
+            blocked: false,
+            createdAt: new Date().toISOString()
+          });
+        }
+      }
       setUser(u);
       setLoading(false);
     });
@@ -68,15 +83,34 @@ function AuthScreen({ lang, setLang, t }) {
     if (!email || !pass) return Alert.alert('Error', 'Fill all fields');
     try {
       if (mode === 'register') {
+        // Регистрация
         const userCred = await createUserWithEmailAndPassword(auth, email, pass);
+        
+        // Сохраняем в Firestore
         await setDoc(doc(db, "users", userCred.user.uid), {
           email: email, role: "user", blocked: false, createdAt: new Date().toISOString()
         });
+
+        // Отправляем письмо для подтверждения почты
+        await sendEmailVerification(userCred.user);
+        Alert.alert(
+          'Успех!', 
+          'Аккаунт создан. Мы отправили письмо на вашу почту. Пожалуйста, перейдите по ссылке в письме для подтверждения.'
+        );
       } else {
-        await signInWithEmailAndPassword(auth, email, pass);
+        // Вход
+        const userCred = await signInWithEmailAndPassword(auth, email, pass);
+        
+        // Проверяем, подтверждена ли почта
+        if (!userCred.user.emailVerified) {
+          Alert.alert(
+            'Внимание', 
+            'Ваша почта не подтверждена! Проверьте входящие письма и перейдите по ссылке из письма.'
+          );
+        }
       }
     } catch (e) {
-      Alert.alert('Error', e.message);
+      Alert.alert('Ошибка', e.message);
     }
   };
 
@@ -91,7 +125,7 @@ function AuthScreen({ lang, setLang, t }) {
       <Text style={s.titleLogo}>{t.appName}</Text>
       <Text style={s.subtitle}>{mode === 'register' ? t.register : t.login}</Text>
 
-      <TextInput style={s.input} placeholder={t.email} placeholderTextColor="#666" value={email} onChangeText={setEmail} autoCapitalize="none" />
+      <TextInput style={s.input} placeholder={t.email} placeholderTextColor="#666" value={email} onChangeText={setEmail} autoCapitalize="none" keyboardType="email-address" />
       <TextInput style={s.input} placeholder={t.password} placeholderTextColor="#666" value={pass} onChangeText={setPass} secureTextEntry />
 
       <TouchableOpacity style={s.mainBtn} onPress={handleAuth}>
@@ -111,7 +145,6 @@ function ChatScreen({ user, lang, setLang, t }) {
     { id: '1', title: t.newChat, messages: [{ text: t.hello, user: false }] }
   ]);
   const [activeChatId, setActiveChatId] = useState('1');
-  
   const [showSidebar, setShowSidebar] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
 
@@ -296,7 +329,6 @@ function ChatScreen({ user, lang, setLang, t }) {
             </View>
             <Text style={s.settingsLabel}>{t.language}</Text>
             
-            {/* Три кнопки выбора языка */}
             <View style={s.langRow}>
               <TouchableOpacity style={[s.langBtn, lang === 'en' && s.langBtnActive]} onPress={() => setLang('en')}>
                 <Text style={[s.langBtnText, lang === 'en' && {color: '#000'}]}>EN</Text>
@@ -361,15 +393,4 @@ const markdownStyles = {
 const s = StyleSheet.create({
   center: { flex: 1, backgroundColor: '#000', justifyContent: 'center', alignItems: 'center' },
   authContainer: { flex: 1, backgroundColor: '#000', justifyContent: 'center', padding: 24 },
-  langTopRow: { flexDirection: 'row', gap: 15, position: 'absolute', top: 60, right: 24 },
-  langText: { color: '#666', fontSize: 16, fontWeight: 'bold' }, langActive: { color: '#fff' },
-  titleLogo: { color: '#fff', fontSize: 36, fontWeight: 'bold', textAlign: 'center', marginBottom: 8 },
-  subtitle: { color: '#888', fontSize: 18, textAlign: 'center', marginBottom: 32 },
-  input: { backgroundColor: '#1c1c1e', color: '#fff', padding: 16, borderRadius: 16, marginBottom: 12, fontSize: 16 },
-  mainBtn: { backgroundColor: '#fff', padding: 16, borderRadius: 16, alignItems: 'center', marginTop: 8 },
-  btnText: { color: '#000', fontWeight: 'bold', fontSize: 16 }, linkText: { color: '#888', textAlign: 'center', marginTop: 20, fontSize: 14 },
-  container: { flex: 1, backgroundColor: '#000' },
-  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 15, paddingHorizontal: 15 },
-  headerBtn: { padding: 5 }, headerCenter: { flex: 1, alignItems: 'center', paddingHorizontal: 10 },
-  headerTitle: { color: '#fff', fontSize: 18, fontWeight: '600' },
-  chatArea: { flex: 1, paddingHoriz
+  langTopRow: { flexDirection: 'row', g
