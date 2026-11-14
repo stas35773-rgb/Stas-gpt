@@ -6,7 +6,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { auth, db } from './firebase';
 import * as ImagePicker from 'expo-image-picker';
 import { Audio } from 'expo-av';
-import Markdown from 'react-native-markdown-display';
+
 
 const API_URL = 'https://stas-gpt.onrender.com';
 
@@ -230,18 +230,16 @@ function ChatScreen({ user, lang, setLang, t }) {
         <View style={{width: 40}} />
       </View>
       <ScrollView ref={scrollRef} style={s.chatArea} contentContainerStyle={{paddingBottom: 20, paddingTop: 10}}>
-        {messages.map((m, i) => (
-          <View key={i} style={[s.messageWrapper, m.user ? s.userWrapper : s.botWrapper]}>
-            {m.image && <Image source={{ uri: `data:image/jpeg;base64,${m.image}` }} style={s.msgImage} />}
-            {m.user ? (
-              <Text selectable={true} style={s.userText}>{m.text}</Text>
-            ) : (
-              <Markdown style={markdownStyles} rules={markdownRules}>{m.text}</Markdown>
-            )}
-          </View>
-        ))}
-        {isLoading && <ActivityIndicator color="#888" style={{ marginTop: 10, alignSelf: 'flex-start', marginLeft: 20 }} />}
-      </ScrollView>
+          {messages.map((m, i) => (
+    <View key={i} style={[s.messageWrapper, m.user ? s.userWrapper : s.botWrapper]}>
+      {m.image && <Image source={{ uri: `data:image/jpeg;base64,${m.image}` }} style={s.msgImage} />}
+      <Text selectable={true} style={m.user ? s.userText : s.botText}>
+        {m.text}
+      </Text>
+    </View>
+  ))}
+  {isLoading && <ActivityIndicator color="#888" style={{ marginTop: 10, alignSelf: 'flex-start', marginLeft: 20 }} />}
+</ScrollView>
       <View style={s.inputContainer}>
         {image && (
           <View style={s.previewContainer}>
@@ -338,28 +336,6 @@ function ChatScreen({ user, lang, setLang, t }) {
   );
 }
 
-const markdownRules = {
-  text: (node, children, parent, styles) => (
-    <Text key={node.key} style={styles.text} selectable={true}>
-      {node.content}
-    </Text>
-  ),
-};
-                                                                      
-const markdownStyles = {
-  body: { color: '#ffffff', fontSize: 16, lineHeight: 24 },
-  heading1: { color: '#ffffff' },
-  heading2: { color: '#ffffff' },
-  heading3: { color: '#ffffff' },
-  strong: { fontWeight: 'bold', color: '#ffffff' },
-  em: { fontStyle: 'italic', color: '#ffffff' },
-  paragraph: { marginTop: 0, marginBottom: 10, color: '#ffffff' },
-  link: { color: '#60a5fa' },
-  code_inline: { backgroundColor: '#2c2c2e', color: '#f87171', paddingHorizontal: 4, borderRadius: 4 },
-  code_block: { backgroundColor: '#1c1c1e', padding: 10, borderRadius: 8, color: '#ffffff' },
-  fence: { backgroundColor: '#1c1c1e', padding: 10, borderRadius: 8, color: '#ffffff' },
-  list_item: { marginBottom: 5, color: '#ffffff' }
-};
 const s = StyleSheet.create({
   center: { flex: 1, backgroundColor: '#000', justifyContent: 'center', alignItems: 'center' },
   authContainer: { flex: 1, backgroundColor: '#000', justifyContent: 'center', padding: 24 },
@@ -379,6 +355,7 @@ const s = StyleSheet.create({
   userWrapper: { backgroundColor: '#1c1c1e', alignSelf: 'flex-end', borderRadius: 20, borderBottomRightRadius: 4 },
   botWrapper: { backgroundColor: 'transparent', alignSelf: 'flex-start', paddingHorizontal: 5 },
   userText: { color: '#fff', fontSize: 16, lineHeight: 22 }, msgImage: { width: 220, height: 220, borderRadius: 12, marginBottom: 8 },
+  botText: { color: '#ffffff', fontSize: 16, lineHeight: 24 },
   inputContainer: { paddingHorizontal: 12, paddingBottom: Platform.OS === 'ios' ? 10 : 25, paddingTop: 10, backgroundColor: '#000' },
   inputRow: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#1c1c1e', borderRadius: 30, padding: 6, gap: 6 },
   iconBtnSquare: { width: 38, height: 38, borderRadius: 12, backgroundColor: '#2c2c2e', justifyContent: 'center', alignItems: 'center' },
