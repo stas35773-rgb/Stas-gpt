@@ -1,8 +1,8 @@
 {
   "expo": {
-    "owner": "clumsymoves-team",
+    "owner": "stasgpt2",
     "name": "Stas GPT",
-    "slug": "stas-gpt1",
+    "slug": "stasgpt",
     "version": "1.0.0",
     "orientation": "portrait",
     "userInterfaceStyle": "dark",
@@ -17,7 +17,7 @@
     },
     "extra": {
       "eas": {
-        "projectId": "8c0647ba-e01a-4b22-8c0e-2c55f12d271f"
+        "projectId": "5e202a9f-ce47-46d6-ba0a-4a53d1ff0aa7"
       }
     }
   }
