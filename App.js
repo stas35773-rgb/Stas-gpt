@@ -212,7 +212,7 @@ function ChatScreen({ user, lang, setLang, t }) {
             {m.user ? (
               <Text selectable={true} style={s.userText}>{m.text}</Text>
             ) : (
-              <Markdown selectable={true} style={markdownStyles}>{m.text}</Markdown>
+              <Markdown style={markdownStyles} rules={markdownRules}>{m.text}</Markdown>
             )}
           </View>
         ))}
