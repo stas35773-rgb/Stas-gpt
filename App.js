@@ -346,18 +346,20 @@ const markdownRules = {
   ),
 };
                                                                       
-const markdownStyles = { 
-  body: { color: '#e0e0e0', fontSize: 16, lineHeight: 24 }, 
-  strong: { fontWeight: 'bold', color: '#fff' }, 
-  em: { fontStyle: 'normal' }, 
-  paragraph: { marginTop: 0, marginBottom: 10 }, 
-  link: { color: '#6ee7b7' }, 
-  code_inline: { backgroundColor: '#2c2c2e', color: '#f87171', paddingHorizontal: 4, borderRadius: 4 }, 
-  code_block: { backgroundColor: '#1c1c1e', padding: 10, borderRadius: 8, color: '#fff' }, 
-  fence: { backgroundColor: '#1c1c1e', padding: 10, borderRadius: 8, color: '#fff' }, 
-  list_item: { marginBottom: 5 } 
+const markdownStyles = {
+  body: { color: '#ffffff', fontSize: 16, lineHeight: 24 },
+  heading1: { color: '#ffffff' },
+  heading2: { color: '#ffffff' },
+  heading3: { color: '#ffffff' },
+  strong: { fontWeight: 'bold', color: '#ffffff' },
+  em: { fontStyle: 'italic', color: '#ffffff' },
+  paragraph: { marginTop: 0, marginBottom: 10, color: '#ffffff' },
+  link: { color: '#60a5fa' },
+  code_inline: { backgroundColor: '#2c2c2e', color: '#f87171', paddingHorizontal: 4, borderRadius: 4 },
+  code_block: { backgroundColor: '#1c1c1e', padding: 10, borderRadius: 8, color: '#ffffff' },
+  fence: { backgroundColor: '#1c1c1e', padding: 10, borderRadius: 8, color: '#ffffff' },
+  list_item: { marginBottom: 5, color: '#ffffff' }
 };
-
 const s = StyleSheet.create({
   center: { flex: 1, backgroundColor: '#000', justifyContent: 'center', alignItems: 'center' },
   authContainer: { flex: 1, backgroundColor: '#000', justifyContent: 'center', padding: 24 },
