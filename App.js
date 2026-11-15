@@ -45,21 +45,39 @@ export default function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [lang, setLang] = useState('ru'); 
+  const [isBlocked, setIsBlocked] = useState(false);
+
   const t = translations[lang];
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (u) => {
+    let unsubDoc = null;
+    
+    const unsubscribeAuth = onAuthStateChanged(auth, async (u) => {
       if (u) {
         const userRef = doc(db, "users", u.uid);
-        const userSnap = await getDoc(userRef);
-        if (!userSnap.exists()) {
-          await setDoc(userRef, { email: u.email, role: "user", blocked: false, createdAt: new Date().toISOString() });
-        }
+        
+        // Следим за статусом блокировки в реальном времени
+        unsubDoc = onSnapshot(userRef, (docSnap) => {
+           if (docSnap.exists()) {
+              setIsBlocked(docSnap.data().blocked);
+           } else {
+              // Создаем, если нет
+              setDoc(userRef, { email: u.email, role: "user", blocked: false, createdAt: new Date().toISOString() });
+           }
+        });
+        
+        setUser(u);
+      } else {
+        setUser(null);
+        setIsBlocked(false);
       }
-      setUser(u);
       setLoading(false);
     });
-    return unsubscribe;
+
+    return () => {
+      unsubscribeAuth();
+      if (unsubDoc) unsubDoc();
+    };
   }, []);
 
   if (loading) return <View style={s.center}><ActivityIndicator color="#fff" size="large" /></View>;
@@ -69,9 +87,24 @@ export default function App() {
     return <VerifyEmailScreen user={user} setUser={setUser} t={t} />;
   }
 
-  return <ChatScreen user={user} lang={lang} setLang={setLang} t={t} />;
-}
+  // Экран блокировки
+  if (isBlocked) {
+    return (
+      <View style={s.center}>
+        <Ionicons name="ban" size={80} color="#f87171" />
+        <Text style={{ color: '#fff', fontSize: 24, fontWeight: 'bold', marginTop: 20 }}>Вы заблокированы</Text>
+        <Text style={{ color: '#888', marginTop: 10, textAlign: 'center', paddingHorizontal: 30 }}>
+          Администратор ограничил ваш доступ к Stas GPT.
+        </Text>
+        <TouchableOpacity onPress={() => signOut(auth)} style={[s.mainBtn, { marginTop: 30, width: 200 }]}>
+          <Text style={s.btnText}>Выйти</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
 
+  return <ChatScreen user={user} lang={lang} setLang={setLang} t={t} isBlocked={isBlocked} />;
+}
 function VerifyEmailScreen({ user, setUser, t }) {
   const [checking, setChecking] = useState(false);
 
