@@ -1,8 +1,8 @@
 {
   "expo": {
-    "owner": "stasgpt2",
+    "owner": "stasgpt3",
     "name": "Stas GPT",
-    "slug": "stasgpt",
+    "slug": "stasgpt3",
     "version": "1.0.0",
     "orientation": "portrait",
     "userInterfaceStyle": "dark",
@@ -17,7 +17,7 @@
     },
     "extra": {
       "eas": {
-        "projectId": "5e202a9f-ce47-46d6-ba0a-4a53d1ff0aa7"
+        "projectId": "59fe2131-fd3d-4bf2-9f4e-74c4790757d0"
       }
     }
   }
