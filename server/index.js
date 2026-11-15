@@ -15,14 +15,18 @@ app.post('/api/chat', async (req, res) => {
   try {
     const { message, images, model, modelString } = req.body;
     
-    // Ставим более стабильную бесплатную модель (Gemma от Google)
-    let modelName = modelString || "google/gemma-2-9b-it:free"; 
-    if (images && images.length > 0) modelName = "nvidia/nemotron-3.5-super-vl:free"; 
+    // Берем модель, которую прислало приложение. Если нет — ставим Gemma из твоего скриншота.
+    let modelName = modelString || "google/gemma-4-26b-a4b:free"; 
+    
+    // Если прислали фото, принудительно используем зрячую NVIDIA
+    if (images && images.length > 0) {
+      modelName = "nvidia/nemotron-3.5-super-vl:free"; 
+    }
 
     const messages = [
       { 
         role: "system", 
-        content: "Ты Stas GPT. Отвечай на языке пользователя. Не используй Markdown (звездочки ** и решетки ###). Пиши математику обычным текстом." 
+        content: "Ты Stas GPT. Отвечай на языке пользователя. Не используй Markdown (звездочки ** и решетки ###). Пиши математику обычным текстом (например 2²)." 
       }
     ];
 
@@ -40,15 +44,17 @@ app.post('/api/chat', async (req, res) => {
       max_tokens: 1500,
     });
 
-    // ЗАЩИТА ОТ ПАДЕНИЯ: Если модель перегружена, мы не падаем, а пишем ошибку
+    // Если ответа нет, не роняем сервер, а пишем в чат
     if (!response.choices || response.choices.length === 0) {
-      return res.status(500).json({ error: 'Нейросеть перегружена. Попробуйте еще раз.' });
+      return res.json({ answer: "Ошибка: Модель перегружена. Попробуйте отправить сообщение еще раз." });
     }
 
     res.json({ answer: response.choices[0].message.content });
+
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'Ошибка сервера: ' + error.message });
+    // Вместо Network Error приложение получит понятный текст
+    res.json({ answer: "Ошибка OpenRouter: " + error.message });
   }
 });
 
