@@ -1,3 +1,4 @@
+import { WebView } from 'react-native-webview';
 import Markdown from 'react-native-markdown-display';
 import React, { useEffect, useState, useRef } from 'react';
 import { View, Text, TextInput, TouchableOpacity, ScrollView, StyleSheet, Alert, ActivityIndicator, Image, Modal, KeyboardAvoidingView, Platform, SafeAreaView } from 'react-native';
@@ -153,6 +154,37 @@ function AuthScreen({ lang, setLang, t }) {
     </View>
   );
   }
+const MathJaxRenderer = ({ text, isLight }) => {
+  const html = `
+    <html>
+      <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+        <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+        <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+        <style>
+          body { 
+            font-size: 18px; 
+            color: ${isLight ? '#000' : '#fff'}; 
+            background-color: transparent; 
+            margin: 0; padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+          }
+        </style>
+      </head>
+      <body>
+        ${text}
+      </body>
+    </html>
+  `;
+
+  return (
+    <WebView 
+      source={{ html }} 
+      style={{ height: 250, width: '100%', backgroundColor: 'transparent' }} 
+      scrollEnabled={false}
+    />
+  );
+};
 // Компонент для эффекта печатающегося текста
 const TypewriterText = ({ text, theme, isSpeaking, onSpeak }) => {
   const [displayedText, setDisplayedText] = useState(text);
@@ -383,15 +415,20 @@ function ChatScreen({ user, lang, setLang, t, theme, setTheme }) {
             {m.image && <Image source={{ uri: `data:image/jpeg;base64,${m.image}` }} style={s.msgImage} />}
             
             {m.user ? (
-              <Text selectable={true} style={[s.userText, isLight && { color: '#000', backgroundColor: '#e5e5ea' }]}>{m.text}</Text>
-            ) : (
-              <TypewriterText 
-                text={m.text} 
-                theme={theme} 
-                isSpeaking={speakingId === i} 
-                onSpeak={() => speakText(m.text, i)} 
-              />
-            )}
+  <Text selectable={true} style={{ fontSize: 16, lineHeight: 22, color: isLight ? '#000' : '#fff' }}>
+    {m.text}
+  </Text>
+) : (
+  <View style={{ width: '100%' }}>
+    {m.text.includes('$') ? (
+       <MathJaxRenderer text={m.text} isLight={isLight} />
+    ) : (
+       <Markdown style={isLight ? markdownStylesLight : markdownStylesDark}>
+         {m.text}
+       </Markdown>
+    )}
+  </View>
+)}
           </View>
         ))}
         {isLoading && <ActivityIndicator color="#888" style={{ marginTop: 10, alignSelf: 'flex-start', marginLeft: 20 }} />}
