@@ -15,14 +15,14 @@ app.post('/api/chat', async (req, res) => {
   try {
     const { message, images, model, modelString } = req.body;
     
-    let modelName = modelString || "nvidia/nemotron-3-ultra-550b-a55b:free";
+    // Ставим более стабильную бесплатную модель (Gemma от Google)
+    let modelName = modelString || "google/gemma-2-9b-it:free"; 
     if (images && images.length > 0) modelName = "nvidia/nemotron-3.5-super-vl:free"; 
 
-    // ГЛАВНОЕ ИЗМЕНЕНИЕ: Просим ИИ не использовать сложные символы
     const messages = [
       { 
         role: "system", 
-        content: "Ты Stas GPT. Отвечай на языке пользователя. ВАЖНО: Не используй Markdown (звездочки ** и решетки ###). Пиши математику обычным текстом, используя символы (например, 2² вместо 2^2, или 2*2=4). Делай текст чистым и понятным." 
+        content: "Ты Stas GPT. Отвечай на языке пользователя. Не используй Markdown (звездочки ** и решетки ###). Пиши математику обычным текстом." 
       }
     ];
 
@@ -40,10 +40,15 @@ app.post('/api/chat', async (req, res) => {
       max_tokens: 1500,
     });
 
+    // ЗАЩИТА ОТ ПАДЕНИЯ: Если модель перегружена, мы не падаем, а пишем ошибку
+    if (!response.choices || response.choices.length === 0) {
+      return res.status(500).json({ error: 'Нейросеть перегружена. Попробуйте еще раз.' });
+    }
+
     res.json({ answer: response.choices[0].message.content });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'Ошибка OpenRouter: ' + error.message });
+    res.status(500).json({ error: 'Ошибка сервера: ' + error.message });
   }
 });
 
