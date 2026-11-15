@@ -40,8 +40,7 @@ app.post('/api/chat', async (req, res) => {
     }
 
     // Системный промпт (персонализация)
-    const sysPrompt = systemPrompt || "Ты Stas GPT. Отвечай на языке пользователя. Не используй Markdown.";
-    
+    const sysPrompt = systemPrompt || "Ты Stas GPT. Отвечай на языке пользователя. Используй Markdown для выделения жирным, списков и кода. Для математики пиши обычные символы (например, 2²).";
     // Если есть фото
     if (images && images.length > 0) {
        const content = [{ type: "text", text: message || "Что на фото?" }];
