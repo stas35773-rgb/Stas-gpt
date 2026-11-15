@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const OpenAI = require('openai');
+const pdf = require('pdf-parse');
 
 const app = express();
 app.use(cors());
@@ -20,54 +21,51 @@ const fallbackModels = [
 
 app.post('/api/chat', async (req, res) => {
   try {
-    const { message, images, model, modelString, history } = req.body;
+    const { message, images, model, modelString, history, systemPrompt, files } = req.body;
     
-    // 1. Формируем историю из прошлых сообщений
     let formattedHistory = [];
     if (history && history.length > 0) {
-      // Берем последние 15 сообщений, чтобы не превысить лимиты
-      formattedHistory = history.slice(-15).map(msg => ({
-        role: msg.user ? "user" : "assistant",
-        content: msg.text
-      }));
+      formattedHistory = history.slice(-15).map(msg => ({ role: msg.user ? "user" : "assistant", content: msg.text }));
     }
 
+    // Извлечение текста из PDF
+    let extractedText = "";
+    if (files && files.length > 0) {
+      for (let f of files) {
+        try {
+          const pdfData = await pdf(Buffer.from(f.data, 'base64'));
+          extractedText += `\n\n[Содержимое файла ${f.name}]:\n${pdfData.text}`;
+        } catch(e) { console.log("Ошибка чтения файла", e); }
+      }
+    }
+
+    // Системный промпт (персонализация)
+    const sysPrompt = systemPrompt || "Ты Stas GPT. Отвечай на языке пользователя. Не используй Markdown.";
+    
     // Если есть фото
     if (images && images.length > 0) {
        const content = [{ type: "text", text: message || "Что на фото?" }];
        images.forEach(img => content.push({ type: "image_url", image_url: { url: `data:image/jpeg;base64,${img}` } }));
        
-       const messagesWithImg = [
-         { role: "system", content: "Ты Stas GPT." },
-         ...formattedHistory,
-         { role: "user", content: content }
-       ];
-
-       try {
-         const response = await openai.chat.completions.create({
+       const response = await openai.chat.completions.create({
             model: "google/gemma-4-26b-a4b-it:free", 
-            messages: messagesWithImg,
+            messages: [{ role: "system", content: sysPrompt }, ...formattedHistory, { role: "user", content: content }],
             max_tokens: 1500,
-         });
-         return res.json({ answer: response.choices[0].message.content });
-       } catch (imgErr) {
-         return res.json({ answer: "Не удалось обработать фото. Попробуйте позже." });
-       }
+       });
+       return res.json({ answer: response.choices[0].message.content });
     }
 
-    // Для текста перебираем модели
+    // Текстовый запрос
     let lastError = "";
     for (let m of fallbackModels) {
       try {
-        const messagesWithHistory = [
-          { role: "system", content: "Ты Stas GPT. Отвечай на языке пользователя. Не используй Markdown." },
-          ...formattedHistory,
-          { role: "user", content: message }
-        ];
-
         const response = await openai.chat.completions.create({
           model: m,
-          messages: messagesWithHistory,
+          messages: [
+            { role: "system", content: sysPrompt },
+            ...formattedHistory,
+            { role: "user", content: message + extractedText }
+          ],
           max_tokens: 1500,
         });
         
@@ -76,11 +74,10 @@ app.post('/api/chat', async (req, res) => {
         }
       } catch (err) {
         lastError = err.message;
-        continue; 
       }
     }
 
-    res.json({ answer: "Модели перегружены. Попробуйте еще раз. Ошибка: " + lastError });
+    res.json({ answer: "Модели перегружены. Ошибка: " + lastError });
 
   } catch (error) {
     res.json({ answer: "Ошибка сервера: " + error.message });
@@ -88,4 +85,4 @@ app.post('/api/chat', async (req, res) => {
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+app.listen(PORT, () => console.log(`Server on ${PORT}`));
