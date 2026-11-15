@@ -159,13 +159,12 @@ function ChatScreen({ user, lang, setLang, t }) {
   const activeChat = chats.find(c => c.id === activeChatId);
   const messages = activeChat ? activeChat.messages : [];
   const models = [
-  { id: 'liquidai/lfm3-1.7b:free', name: 'StasGPT-flash', desc: 'Быстрые ответы', badge: 'Fast' },
-  { id: 'google/gemma-4-26b-a4b:free', name: 'StasGPT-pro', desc: 'Для сложных ответов', badge: 'Pro' },
-  { id: 'thinkingmachines/inkling-2-small:free', name: 'StasGPT-smart', desc: 'Ещё сложнее ответы', badge: 'Smart' },
-  { id: 'nvidia/nemotron-3-ultra-550b-a55b:free', name: 'StasGPT-expert', desc: 'Для тяжелых задач', badge: 'Expert' },
-  { id: 'nvidia/nemotron-3.5-super-vl:free', name: 'StasGPT-build', desc: 'Для создания приложений', badge: 'Build' },
+  { id: 'liquidai/lfm3-1.7b:free', name: 'StasGPT-flash', desc: t.m_flash, badge: 'Fast' },
+  { id: 'google/gemma-4-26b-a4b:free', name: 'StasGPT-pro', desc: t.m_pro, badge: 'Pro' },
+  { id: 'nvidia/nemotron-3-ultra-550b-a55b:free', name: 'StasGPT-smart', desc: t.m_smart, badge: 'Smart' },
+  { id: 'nvidia/nemotron-3-ultra-550b-a55b:free', name: 'StasGPT-expert', desc: t.m_expert, badge: 'Expert' },
+  { id: 'nvidia/nemotron-3.5-super-vl:free', name: 'StasGPT-build', desc: t.m_build, badge: 'Build' },
 ];
-
   const createNewChat = () => {
     const newId = Date.now().toString();
     setChats([{ id: newId, title: t.newChat, messages: [{ text: t.hello, user: false }] }, ...chats]);
