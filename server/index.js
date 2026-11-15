@@ -16,8 +16,7 @@ app.post('/api/chat', async (req, res) => {
     const { message, images, model, modelString } = req.body;
     
     // Берем модель, которую прислало приложение. Если нет — ставим Gemma из твоего скриншота.
-    let modelName = modelString || "google/gemma-4-26b-a4b:free"; 
-    
+    let modelName =modelString || "mistralai/mistral-7b-instruct:free";
     // Если прислали фото, принудительно используем зрячую NVIDIA
     if (images && images.length > 0) {
       modelName = "nvidia/nemotron-3.5-super-vl:free"; 
