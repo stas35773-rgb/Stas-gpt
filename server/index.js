@@ -11,49 +11,63 @@ const openai = new OpenAI({
   apiKey: process.env.OPENROUTER_API_KEY
 });
 
+// Идеальный список из твоих скриншотов (от быстрых к мощным)
+const fallbackModels = [
+  "liquidai/lfm3-1.7b:free",                 // 2.2s (Быстрая, текст)
+  "google/gemma-4-26b-a4b-it:free",          // 1.0s (Быстрая, видит фото)
+  "nvidia/nemotron-3.5-super-vl:free",       // 10s  (Видит фото)
+  "nvidia/nemotron-3-ultra-550b-a55b:free"   // 72s  (Мощная, но медленная - оставим на крайний случай)
+];
+
 app.post('/api/chat', async (req, res) => {
   try {
     const { message, images, model, modelString } = req.body;
     
-    // Берем модель, которую прислало приложение. Если нет — ставим Gemma из твоего скриншота.
-    let modelName =modelString || "mistralai/mistral-7b-instruct:free";
-    // Если прислали фото, принудительно используем зрячую NVIDIA
-    if (images && images.length > 0) {
-      modelName = "nvidia/nemotron-3.5-super-vl:free"; 
-    }
-
-    const messages = [
-      { 
-        role: "system", 
-        content: "Ты Stas GPT. Отвечай на языке пользователя. Не используй Markdown (звездочки ** и решетки ###). Пиши математику обычным текстом (например 2²)." 
-      }
-    ];
-
+    // Если есть фото, сразу отправляем в Gemma (она быстрая и видит картинки)
     if (images && images.length > 0) {
        const content = [{ type: "text", text: message || "Что на фото?" }];
        images.forEach(img => content.push({ type: "image_url", image_url: { url: `data:image/jpeg;base64,${img}` } }));
-       messages.push({ role: "user", content: content });
-    } else {
-       messages.push({ role: "user", content: message });
+       
+       try {
+         const response = await openai.chat.completions.create({
+            model: "google/gemma-4-26b-a4b-it:free", 
+            messages: [{ role: "user", content: content }],
+            max_tokens: 1500,
+         });
+         return res.json({ answer: response.choices[0].message.content });
+       } catch (imgErr) {
+         return res.json({ answer: "Не удалось обработать фото. Попробуйте позже." });
+       }
     }
 
-    const response = await openai.chat.completions.create({
-      model: modelName,
-      messages: messages,
-      max_tokens: 1500,
-    });
-
-    // Если ответа нет, не роняем сервер, а пишем в чат
-    if (!response.choices || response.choices.length === 0) {
-      return res.json({ answer: "Ошибка: Модель перегружена. Попробуйте отправить сообщение еще раз." });
+    // Для текста перебираем модели
+    let lastError = "";
+    for (let m of fallbackModels) {
+      try {
+        const response = await openai.chat.completions.create({
+          model: m,
+          messages: [
+            { role: "system", content: "Ты Stas GPT. Отвечай на языке пользователя. Не используй Markdown. Пиши математику обычным текстом." },
+            { role: "user", content: message }
+          ],
+          max_tokens: 1500,
+        });
+        
+        if (response.choices && response.choices.length > 0) {
+           return res.json({ answer: response.choices[0].message.content });
+        }
+      } catch (err) {
+        console.log(`Модель ${m} не сработала: ${err.message}`);
+        lastError = err.message;
+        continue; 
+      }
     }
 
-    res.json({ answer: response.choices[0].message.content });
+    res.json({ answer: "Модели перегружены. Попробуйте еще раз. Ошибка: " + lastError });
 
   } catch (error) {
     console.error(error);
-    // Вместо Network Error приложение получит понятный текст
-    res.json({ answer: "Ошибка OpenRouter: " + error.message });
+    res.json({ answer: "Ошибка сервера: " + error.message });
   }
 });
 
