@@ -597,24 +597,36 @@ const markdownStylesDark = {
   body: { color: '#fff', fontSize: 16, lineHeight: 24 },
   strong: { fontWeight: 'bold', color: '#fff' },
   em: { fontStyle: 'italic', color: '#fff' },
-  paragraph: { marginTop: 0, marginBottom: 10, flexWrap: 'wrap' },
+  paragraph: { marginTop: 0, marginBottom: 12, flexWrap: 'wrap' }, // Увеличили отступ между абзацами
   link: { color: '#60a5fa' },
   code_inline: { backgroundColor: '#2c2c2e', color: '#f87171', paddingHorizontal: 4, borderRadius: 4 },
   code_block: { backgroundColor: '#1c1c1e', padding: 10, borderRadius: 8, color: '#fff' },
   fence: { backgroundColor: '#1c1c1e', padding: 10, borderRadius: 8, color: '#fff' },
-  list_item: { marginBottom: 5, color: '#fff' }
+  
+  // НОВЫЕ СТИЛИ ДЛЯ СПИСКОВ:
+  bullet_list: { marginVertical: 8 },
+  ordered_list: { marginVertical: 8 },
+  list_item: { marginBottom: 8, flexDirection: 'row', justifyContent: 'flex-start' },
+  bullet_list_icon: { marginLeft: 0, marginRight: 10, color: '#fff', fontSize: 16 },
+  ordered_list_icon: { marginLeft: 0, marginRight: 10, color: '#fff', fontSize: 16 },
 };
 
 const markdownStylesLight = {
   body: { color: '#000', fontSize: 16, lineHeight: 24 },
   strong: { fontWeight: 'bold', color: '#000' },
   em: { fontStyle: 'italic', color: '#000' },
-  paragraph: { marginTop: 0, marginBottom: 10, flexWrap: 'wrap' },
+  paragraph: { marginTop: 0, marginBottom: 12, flexWrap: 'wrap' }, // Увеличили отступ между абзацами
   link: { color: '#2563eb' },
   code_inline: { backgroundColor: '#e5e5ea', color: '#c026d3', paddingHorizontal: 4, borderRadius: 4 },
   code_block: { backgroundColor: '#f2f2f7', padding: 10, borderRadius: 8, color: '#000' },
   fence: { backgroundColor: '#f2f2f7', padding: 10, borderRadius: 8, color: '#000' },
-  list_item: { marginBottom: 5, color: '#000' }
+  
+  // НОВЫЕ СТИЛИ ДЛЯ СПИСКОВ:
+  bullet_list: { marginVertical: 8 },
+  ordered_list: { marginVertical: 8 },
+  list_item: { marginBottom: 8, flexDirection: 'row', justifyContent: 'flex-start' },
+  bullet_list_icon: { marginLeft: 0, marginRight: 10, color: '#000', fontSize: 16 },
+  ordered_list_icon: { marginLeft: 0, marginRight: 10, color: '#000', fontSize: 16 },
 };
 
 const s = StyleSheet.create({
