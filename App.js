@@ -1,3 +1,4 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useEffect, useState, useRef } from 'react';
 import { View, Text, TextInput, TouchableOpacity, ScrollView, StyleSheet, Alert, ActivityIndicator, Image, Modal, KeyboardAvoidingView, Platform, SafeAreaView } from 'react-native';
 import { onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, sendEmailVerification } from 'firebase/auth';
@@ -155,7 +156,33 @@ function ChatScreen({ user, lang, setLang, t }) {
   const [isRecording, setIsRecording] = useState(false);
   const [recording, setRecording] = useState(null);
   const scrollRef = useRef();
+// ЗАГРУЗКА ИСТОРИИ ПРИ СТАРТЕ
+useEffect(() => {
+  const loadChats = async () => {
+    try {
+      const saved = await AsyncStorage.getItem(`@chats_${user.uid}`);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed.length > 0) {
+          setChats(parsed);
+          setActiveChatId(parsed[0].id);
+        }
+      }
+    } catch (e) { console.log('Ошибка загрузки:', e); }
+  };
+  loadChats();
+}, [user.uid]);
 
+// СОХРАНЕНИЕ ИСТОРИИ ПРИ ИЗМЕНЕНИИ
+useEffect(() => {
+  const saveChats = async () => {
+    try {
+      await AsyncStorage.setItem(`@chats_${user.uid}`, JSON.stringify(chats));
+    } catch (e) { console.log('Ошибка сохранения:', e); }
+  };
+  saveChats();
+}, [chats, user.uid]);
+  
   const activeChat = chats.find(c => c.id === activeChatId);
   const messages = activeChat ? activeChat.messages : [];
   const models = [
@@ -208,16 +235,30 @@ function ChatScreen({ user, lang, setLang, t }) {
 
     try {
       const response = await fetch(`${API_URL}/api/chat`, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: userMsg || "Analyze", images: currentImage ? [currentImage] : [], model: (selectedModel === 'fast' || selectedModel === 'beta') ? 'beta' : 'v1' })
-      });
+  method: 'POST', headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ 
+    message: userMsg || "Analyze", 
+    images: currentImage ? [currentImage] : [], 
+    model: selectedModel,
+    modelString: selectedModel,
+    history: messages 
+  })
+}); // <--- ВОТ ЗДЕСЬ НУЖНО ЗАКРЫТЬ FETCH
       const data = await response.json();
       const aiAnswer = data.answer || "Error";
       updateMessages([...newMessages, { text: aiAnswer, user: false }]);
-      try { await addDoc(collection(db, "messages"), { userId: user.uid, email: user.email, question: userMsg || "[Фото]", answer: aiAnswer, model: selectedModel, createdAt: serverTimestamp() }); } catch (err) { }
-    } catch (e) { updateMessages([...newMessages, { text: "Network error: " + e.message, user: false }]); }
-    setIsLoading(false); setTimeout(() => scrollRef.current?.scrollToEnd(), 100);
-  };
+          try { 
+      await addDoc(collection(db, "messages"), { userId: user.uid, email: user.email, question: userMsg || "[Фото]", answer: aiAnswer, model: selectedModel, createdAt: serverTimestamp() }); 
+    } catch (err) { 
+      console.log(err); 
+    }
+  } catch (e) {
+    updateMessages([...newMessages, { text: "Ошибка сети: " + e.message, user: false }]);
+  }
+  
+  setIsLoading(false);
+  setTimeout(() => scrollRef.current?.scrollToEnd(), 100);
+};
 
   const currentModelObj = models.find(m => m.id === selectedModel) || models[3];
 
