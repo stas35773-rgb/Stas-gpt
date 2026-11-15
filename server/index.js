@@ -11,27 +11,42 @@ const openai = new OpenAI({
   apiKey: process.env.OPENROUTER_API_KEY
 });
 
-// Идеальный список из твоих скриншотов (от быстрых к мощным)
 const fallbackModels = [
-  "liquidai/lfm3-1.7b:free",                 // 2.2s (Быстрая, текст)
-  "google/gemma-4-26b-a4b-it:free",          // 1.0s (Быстрая, видит фото)
-  "nvidia/nemotron-3.5-super-vl:free",       // 10s  (Видит фото)
-  "nvidia/nemotron-3-ultra-550b-a55b:free"   // 72s  (Мощная, но медленная - оставим на крайний случай)
+  "liquidai/lfm3-1.7b:free",                 
+  "google/gemma-4-26b-a4b-it:free",          
+  "nvidia/nemotron-3.5-super-vl:free",       
+  "nvidia/nemotron-3-ultra-550b-a55b:free"   
 ];
 
 app.post('/api/chat', async (req, res) => {
   try {
-    const { message, images, model, modelString } = req.body;
+    const { message, images, model, modelString, history } = req.body;
     
-    // Если есть фото, сразу отправляем в Gemma (она быстрая и видит картинки)
+    // 1. Формируем историю из прошлых сообщений
+    let formattedHistory = [];
+    if (history && history.length > 0) {
+      // Берем последние 15 сообщений, чтобы не превысить лимиты
+      formattedHistory = history.slice(-15).map(msg => ({
+        role: msg.user ? "user" : "assistant",
+        content: msg.text
+      }));
+    }
+
+    // Если есть фото
     if (images && images.length > 0) {
        const content = [{ type: "text", text: message || "Что на фото?" }];
        images.forEach(img => content.push({ type: "image_url", image_url: { url: `data:image/jpeg;base64,${img}` } }));
        
+       const messagesWithImg = [
+         { role: "system", content: "Ты Stas GPT." },
+         ...formattedHistory,
+         { role: "user", content: content }
+       ];
+
        try {
          const response = await openai.chat.completions.create({
             model: "google/gemma-4-26b-a4b-it:free", 
-            messages: [{ role: "user", content: content }],
+            messages: messagesWithImg,
             max_tokens: 1500,
          });
          return res.json({ answer: response.choices[0].message.content });
@@ -44,12 +59,15 @@ app.post('/api/chat', async (req, res) => {
     let lastError = "";
     for (let m of fallbackModels) {
       try {
+        const messagesWithHistory = [
+          { role: "system", content: "Ты Stas GPT. Отвечай на языке пользователя. Не используй Markdown." },
+          ...formattedHistory,
+          { role: "user", content: message }
+        ];
+
         const response = await openai.chat.completions.create({
           model: m,
-          messages: [
-            { role: "system", content: "Ты Stas GPT. Отвечай на языке пользователя. Не используй Markdown. Пиши математику обычным текстом." },
-            { role: "user", content: message }
-          ],
+          messages: messagesWithHistory,
           max_tokens: 1500,
         });
         
@@ -57,7 +75,6 @@ app.post('/api/chat', async (req, res) => {
            return res.json({ answer: response.choices[0].message.content });
         }
       } catch (err) {
-        console.log(`Модель ${m} не сработала: ${err.message}`);
         lastError = err.message;
         continue; 
       }
@@ -66,7 +83,6 @@ app.post('/api/chat', async (req, res) => {
     res.json({ answer: "Модели перегружены. Попробуйте еще раз. Ошибка: " + lastError });
 
   } catch (error) {
-    console.error(error);
     res.json({ answer: "Ошибка сервера: " + error.message });
   }
 });
