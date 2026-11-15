@@ -455,4 +455,14 @@ const s = StyleSheet.create({
   langRow: { flexDirection: 'row', gap: 10, marginBottom: 20 },
   langBtn: { flex: 1, backgroundColor: '#2c2c2e', padding: 12, borderRadius: 10, alignItems: 'center' },
   langBtnActive: { backgroundColor: '#fff' },
+  langBtnText: { color: '#fff', fontWeight: 'bold', fontSize: 16 },
+  divider: { height: 1, backgroundColor: '#333', marginBottom: 20 },
+  logoutBtn: { flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(248, 113, 113, 0.1)', padding: 15, borderRadius: 10, gap: 10 },
+  logoutBtnText: { color: '#f87171', fontWeight: 'bold', fontSize: 16 },
+  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end' },
+  floatingMenuLeft: { backgroundColor: '#1c1c1e', position: 'absolute', bottom: 90, left: 15, borderRadius: 20, paddingVertical: 10, width: 200 },
+  menuItem: { flexDirection: 'row', alignItems: 'center', paddingVertical: 14, paddingHorizontal: 20, gap: 15 },
+  menuIcon: { marginRight: 5 },
+  menuItemText: { color: '#fff', fontSize: 16, fontWeight: '500' },
+});
   
