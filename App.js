@@ -159,8 +159,8 @@ function ChatScreen({ user, lang, setLang, t }) {
   const activeChat = chats.find(c => c.id === activeChatId);
   const messages = activeChat ? activeChat.messages : [];
   const models = [
-  { id: 'liquidai/lfm3-1.7b:free', name: 'StasGPT-flash', desc: t.m_flash, badge: 'Fast' },
-  { id: 'google/gemma-4-26b-a4b:free', name: 'StasGPT-pro', desc: t.m_pro, badge: 'Pro' },
+  { id: 'mistralai/mistral-7b-instruct:free', name: 'StasGPT-flash', desc: t.m_flash, badge: 'Fast' },
+  { id: 'mistralai/mistral-7b-instruct:free', name: 'StasGPT-pro', desc: t.m_pro, badge: 'Pro' },
   { id: 'nvidia/nemotron-3-ultra-550b-a55b:free', name: 'StasGPT-smart', desc: t.m_smart, badge: 'Smart' },
   { id: 'nvidia/nemotron-3-ultra-550b-a55b:free', name: 'StasGPT-expert', desc: t.m_expert, badge: 'Expert' },
   { id: 'nvidia/nemotron-3.5-super-vl:free', name: 'StasGPT-build', desc: t.m_build, badge: 'Build' },
