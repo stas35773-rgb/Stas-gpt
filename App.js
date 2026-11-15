@@ -1,3 +1,4 @@
+import Markdown from 'react-native-markdown-display';
 import React, { useEffect, useState, useRef } from 'react';
 import { View, Text, TextInput, TouchableOpacity, ScrollView, StyleSheet, Alert, ActivityIndicator, Image, Modal, KeyboardAvoidingView, Platform, SafeAreaView } from 'react-native';
 import { onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, sendEmailVerification } from 'firebase/auth';
@@ -154,26 +155,30 @@ function AuthScreen({ lang, setLang, t }) {
   }
 // Компонент для эффекта печатающегося текста
 const TypewriterText = ({ text, theme, isSpeaking, onSpeak }) => {
-  const [displayedText, setDisplayedText] = useState('');
-  
+  const [displayedText, setDisplayedText] = useState(text);
+  const isLight = theme === 'light';
+
   useEffect(() => {
+    if (!text) return;
     let i = 0;
     setDisplayedText('');
     const interval = setInterval(() => {
-      setDisplayedText((prev) => prev + text.charAt(i));
+      setDisplayedText(text.substring(0, i));
       i++;
-      if (i >= text.length) clearInterval(interval);
-    }, 10); // Скорость печати (10мс на символ)
+      if (i > text.length) clearInterval(interval);
+    }, 10); // Скорость печати
     return () => clearInterval(interval);
   }, [text]);
 
   return (
-    <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: 8 }}>
-      <Text selectable={true} style={theme === 'dark' ? { color: '#fff', fontSize: 16, lineHeight: 24, flex: 1 } : { color: '#000', fontSize: 16, lineHeight: 24, flex: 1 }}>
-        {displayedText}
-      </Text>
-      {displayedText.length === text.length && (
-         <TouchableOpacity onPress={onSpeak} style={{ padding: 5 }}>
+    <View style={{ flexDirection: 'row', alignItems: 'flex-start', width: '100%' }}>
+      <View style={{ flexShrink: 1, width: '100%' }}>
+        <Markdown style={isLight ? markdownStylesLight : markdownStylesDark}>
+          {displayedText}
+        </Markdown>
+      </View>
+      {displayedText.length === text.length && text.length > 0 && (
+         <TouchableOpacity onPress={onSpeak} style={{ paddingLeft: 10, paddingTop: 2 }}>
             <Ionicons name={isSpeaking ? "volume-high" : "volume-medium-outline"} size={20} color={isSpeaking ? "#3b82f6" : "#888"} />
          </TouchableOpacity>
       )}
