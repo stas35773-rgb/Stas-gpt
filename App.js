@@ -1,3 +1,4 @@
+import { doc, setDoc, getDoc, collection, addDoc, serverTimestamp, query, orderBy, limit } from 'firebase/firestore';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useEffect, useState, useRef } from 'react';
 import { View, Text, TextInput, TouchableOpacity, ScrollView, StyleSheet, Alert, ActivityIndicator, Image, Modal, KeyboardAvoidingView, Platform, SafeAreaView } from 'react-native';
@@ -156,6 +157,7 @@ function ChatScreen({ user, lang, setLang, t }) {
   const [isRecording, setIsRecording] = useState(false);
   const [recording, setRecording] = useState(null);
   const scrollRef = useRef();
+  const [announcement, setAnnouncement] = useState(null);
 // ЗАГРУЗКА ИСТОРИИ ПРИ СТАРТЕ
 useEffect(() => {
   const loadChats = async () => {
@@ -181,7 +183,23 @@ useEffect(() => {
     } catch (e) { console.log('Ошибка сохранения:', e); }
   };
   saveChats();
-}, [chats, user.uid]);
+}, [chats, user.uid]); // <--- ВОТ ЗДЕСЬ ЗАКРЫВАЕТСЯ ПЕРВЫЙ useEffect
+
+// ЗАГРУЗКА ОБЪЯВЛЕНИЯ
+useEffect(() => {
+  const fetchAnnouncement = async () => {
+    try {
+      const q = query(collection(db, "announcements"), orderBy("createdAt", "desc"), limit(1));
+      const snap = await getDocs(q);
+      if (!snap.empty) {
+        setAnnouncement(snap.docs[0].data().text);
+      }
+    } catch (e) {
+      console.log("Ошибка загрузки объявления:", e);
+    }
+  };
+  fetchAnnouncement();
+}, []); // <--- ВОТ ЗДЕСЬ ЗАКРЫВАЕТСЯ ВТОРОЙ useEffect
   
   const activeChat = chats.find(c => c.id === activeChatId);
   const messages = activeChat ? activeChat.messages : [];
@@ -269,6 +287,11 @@ useEffect(() => {
         <View style={s.headerCenter}><Text style={s.headerTitle} numberOfLines={1}>{activeChat?.title}</Text></View>
         <View style={{width: 40}} />
       </View>
+  {announcement && (
+  <View style={{ backgroundColor: '#fbbf24', padding: 12, marginHorizontal: 15, marginTop: 10, borderRadius: 10 }}>
+    <Text style={{ color: '#000', fontWeight: 'bold' }}>📢 {announcement}</Text>
+  </View>
+)}
       <ScrollView ref={scrollRef} style={s.chatArea} contentContainerStyle={{paddingBottom: 20, paddingTop: 10}}>
           {messages.map((m, i) => (
     <View key={i} style={[s.messageWrapper, m.user ? s.userWrapper : s.botWrapper]}>
