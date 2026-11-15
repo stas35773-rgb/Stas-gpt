@@ -398,56 +398,62 @@ function ChatScreen({ user, lang, setLang, t, theme, setTheme }) {
       </ScrollView>
 
       {/* ПАНЕЛЬ ВВОДА */}
-      <View style={[s.inputContainer, isLight && { backgroundColor: '#fff' }]}>
-        
-        {/* Превью картинки */}
-        {image && (
-          <View style={s.previewContainer}>
-            <Image source={{ uri: `data:image/jpeg;base64,${image}` }} style={s.previewImage} />
-            <TouchableOpacity onPress={() => setImage(null)} style={s.removeImageBtn}><Ionicons name="close" size={14} color="#fff" /></TouchableOpacity>
-          </View>
-        )}
+<View style={[s.inputContainer, isLight && { backgroundColor: '#fff' }]}>
+  
+  {/* Превью картинки */}
+  {image && (
+    <View style={s.previewContainer}>
+      <Image source={{ uri: `data:image/jpeg;base64,${image}` }} style={s.previewImage} />
+      <TouchableOpacity onPress={() => setImage(null)} style={s.removeImageBtn}><Ionicons name="close" size={14} color="#fff" /></TouchableOpacity>
+    </View>
+  )}
 
-        {/* Превью файлов */}
-        {files.length > 0 && files.map((f, idx) => (
-          <View key={idx} style={[s.previewContainer, { flexDirection: 'row', alignItems: 'center', backgroundColor: '#1c1c1e', padding: 8, borderRadius: 10, marginBottom: 5 }]}>
-             <Ionicons name="document-text" size={20} color="#3b82f6" />
-             <Text style={{ color: '#fff', marginLeft: 8, flex: 1 }} numberOfLines={1}>{f.name}</Text>
-             <TouchableOpacity onPress={() => setFiles(prev => prev.filter((_, i) => i !== idx))}><Ionicons name="close" size={20} color="#f87171" /></TouchableOpacity>
-          </View>
-        ))}
+  {/* Превью файлов */}
+  {files.length > 0 && files.map((f, idx) => (
+    <View key={idx} style={[s.previewContainer, { flexDirection: 'row', alignItems: 'center', backgroundColor: isLight ? '#e5e5ea' : '#1c1c1e', padding: 8, borderRadius: 10, marginBottom: 5 }]}>
+       <Ionicons name="document-text" size={20} color={isLight ? '#000' : '#3b82f6'} />
+       <Text style={{ color: isLight ? '#000' : '#fff', marginLeft: 8, flex: 1 }} numberOfLines={1}>{f.name}</Text>
+       <TouchableOpacity onPress={() => setFiles(prev => prev.filter((_, i) => i !== idx))}><Ionicons name="close" size={20} color="#f87171" /></TouchableOpacity>
+    </View>
+  ))}
 
-        <View style={[s.inputRow, isLight && { backgroundColor: '#f2f2f7' }]}>
-          <TouchableOpacity style={s.iconBtnSquare} onPress={() => setShowAttachmentMenu(true)}>
-            <Ionicons name="add" size={24} color={isLight ? '#000' : '#fff'} />
-          </TouchableOpacity>
-          
-          <TextInput 
-            style={[s.textInput, isLight && { color: '#000' }]} 
-            value={input} 
-            onChangeText={setInput} 
-            placeholder={t.ask} 
-            placeholderTextColor="#888" 
-            multiline 
-          />
-          
-          <TouchableOpacity style={s.modelSelectorBtn} onPress={() => setShowModelMenu(true)}>
-            <Ionicons name="flash" size={14} color="#3b82f6" />
-            <Text style={s.modelSelectorText} numberOfLines={1}>
-              {currentModelObj.name.split('-')[1] || currentModelObj.name}
-            </Text>
-            <Ionicons name="chevron-down" size={10} color="#888" />
-          </TouchableOpacity>
-          
-          <TouchableOpacity style={[s.iconBtnPlain, isRecording && { backgroundColor: '#f87171', borderRadius: 19 }]} onPress={isRecording ? stopRecording : startRecording}>
-            <Ionicons name={isRecording ? "stop" : "mic-outline"} size={24} color={isLight ? '#000' : '#fff'} />
-          </TouchableOpacity>
-          
-          <TouchableOpacity style={[s.sendBtnCircle, (!input.trim() && !image && files.length === 0) && {opacity: 0.5}]} onPress={send} disabled={isLoading || (!input.trim() && !image && files.length === 0)}>
-            <Ionicons name="arrow-up" size={20} color="#000" />
-          </TouchableOpacity>
-        </View>
-      </View>
+  <View style={[s.inputRow, isLight && { backgroundColor: '#f2f2f7' }]}>
+    
+    {/* Кнопка Плюс */}
+    <TouchableOpacity style={[s.iconBtnSquare, isLight && { backgroundColor: '#e5e5ea' }]} onPress={() => setShowAttachmentMenu(true)}>
+      <Ionicons name="add" size={24} color={isLight ? '#000' : '#fff'} />
+    </TouchableOpacity>
+    
+    {/* Поле ввода текста */}
+    <TextInput 
+      style={[s.textInput, isLight && { color: '#000' }]} 
+      value={input} 
+      onChangeText={setInput} 
+      placeholder={t.ask} 
+      placeholderTextColor="#888" 
+      multiline 
+    />
+    
+    {/* Кнопка выбора модели */}
+    <TouchableOpacity style={[s.modelSelectorBtn, isLight && { backgroundColor: '#e5e5ea' }]} onPress={() => setShowModelMenu(true)}>
+      <Ionicons name="flash" size={14} color={isLight ? '#000' : '#3b82f6'} />
+      <Text style={[s.modelSelectorText, isLight && { color: '#000' }]} numberOfLines={1}>
+        {currentModelObj.name.split('-')[1] || currentModelObj.name}
+      </Text>
+      <Ionicons name="chevron-down" size={10} color={isLight ? '#000' : '#888'} />
+    </TouchableOpacity>
+    
+    {/* Кнопка Микрофона */}
+    <TouchableOpacity style={[s.iconBtnPlain, isRecording && { backgroundColor: '#f87171', borderRadius: 19 }]} onPress={isRecording ? stopRecording : startRecording}>
+      <Ionicons name={isRecording ? "stop" : "mic-outline"} size={24} color={isLight ? '#000' : '#fff'} />
+    </TouchableOpacity>
+    
+    {/* Кнопка Отправить */}
+    <TouchableOpacity style={[s.sendBtnCircle, isLight && { backgroundColor: '#000' }, (!input.trim() && !image && files.length === 0) && {opacity: 0.5}]} onPress={send} disabled={isLoading || (!input.trim() && !image && files.length === 0)}>
+      <Ionicons name="arrow-up" size={20} color={isLight ? '#fff' : '#000'} />
+    </TouchableOpacity>
+  </View>
+</View>
 
       {/* БОКОВОЕ МЕНЮ (ИСТОРИЯ) */}
       <Modal visible={showSidebar} transparent animationType="fade">
