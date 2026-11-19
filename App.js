@@ -83,7 +83,13 @@ export default function App() {
 
   if (loading) return <View style={s.center}><ActivityIndicator color="#fff" size="large" /></View>;
   if (!user) return <AuthScreen lang={lang} setLang={setLang} t={t} />;
-  if (!user.emailVerified) return <VerifyEmailScreen user={user} setUser={setUser} t={t} />;
+  // Проверяем, зашел ли пользователь через Google
+const isGoogleUser = user.providerData?.some(provider => provider.providerId === 'google.com');
+
+// Если почта не подтверждена И это НЕ Google-аккаунт, тогда показываем экран проверки
+if (!user.emailVerified && !isGoogleUser) {
+  return <VerifyEmailScreen user={user} setUser={setUser} t={t} />;
+}
   
   if (isBlocked) {
     return (
