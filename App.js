@@ -637,6 +637,7 @@ function ChatScreen({ user, lang, setLang, t, theme, setTheme }) {
   );
 }
 const markdownStylesDark = {
+  image: { width: 250, height: 250, borderRadius: 10, marginTop: 10 },
   body: { color: '#fff', fontSize: 16, lineHeight: 24 },
   strong: { fontWeight: 'bold', color: '#fff' },
   em: { fontStyle: 'italic', color: '#fff' },
@@ -655,6 +656,7 @@ const markdownStylesDark = {
 };
 
 const markdownStylesLight = {
+  image: { width: 250, height: 250, borderRadius: 10, marginTop: 10 },
   body: { color: '#000', fontSize: 16, lineHeight: 24 },
   strong: { fontWeight: 'bold', color: '#000' },
   em: { fontStyle: 'italic', color: '#000' },
