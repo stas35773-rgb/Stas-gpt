@@ -21,14 +21,14 @@ app.post('/api/chat', async (req, res) => {
     const isImageRequest = /нарисуй|сгенерируй картинку|draw|generate image/i.test(message);
 
     if (isImageRequest) {
-      // Используем DALL-E 3 (требует баланса на OpenRouter)
-      const response = await openai.images.generate({
-        model: "openai/dall-e-3",
-        prompt: message,
-        n: 1,
-        size: "1024x1024",
-      });
-      return res.json({ answer: `![Изображение](${response.data[0].url})` });
+      // Очищаем запрос от слов "нарисуй" и т.д.
+      const cleanPrompt = message.replace(/нарисуй|сгенерируй|картинку|draw|generate|image/gi, '').trim();
+      
+      // Используем бесплатный сервис Pollinations.ai
+      const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(cleanPrompt || message)}?width=1024&height=1024&nologo=true`;
+      
+      // Возвращаем ответ в формате Markdown (приложение само покажет картинку)
+      return res.json({ answer: `Вот твоя картинка:\n\n![Картинка](${imageUrl})` });
     }
 
     // Обычный текстовый запрос
@@ -41,8 +41,9 @@ app.post('/api/chat', async (req, res) => {
       max_tokens: 1500,
     });
     res.json({ answer: response.choices[0].message.content });
+    
   } catch (error) {
-    res.json({ answer: "Ошибка генерации: " + error.message });
+    res.json({ answer: "Ошибка сервера: " + error.message });
   }
 });
 
