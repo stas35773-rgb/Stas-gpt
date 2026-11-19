@@ -130,6 +130,19 @@ function AuthScreen({ lang, setLang, t }) {
   const [email, setEmail] = useState('');
   const [pass, setPass] = useState('');
   const [mode, setMode] = useState('register');
+  const [request, response, promptAsync] = Google.useIdTokenAuthRequest({
+  clientId: '317537424062-9dadian41dm35nj4qrjq79tj6defji0h.apps.googleusercontent.com',
+});
+
+useEffect(() => {
+  if (response?.type === 'success') {
+    const { id_token } = response.params;
+    const credential = GoogleAuthProvider.credential(id_token);
+    signInWithCredential(auth, credential).catch((error) => {
+      Alert.alert('Ошибка Google', error.message);
+    });
+  }
+}, [response]);
   const handleAuth = async () => {
   if (!email || !pass) return Alert.alert(t.error, t.fillFields);
   try {
@@ -155,6 +168,13 @@ function AuthScreen({ lang, setLang, t }) {
       <TextInput style={s.input} placeholder={t.email} placeholderTextColor="#666" value={email} onChangeText={setEmail} autoCapitalize="none" />
       <TextInput style={s.input} placeholder={t.password} placeholderTextColor="#666" value={pass} onChangeText={setPass} secureTextEntry />
       <TouchableOpacity style={s.mainBtn} onPress={handleAuth}><Text style={s.btnText}>{mode === 'register' ? t.createAcc : t.signIn}</Text></TouchableOpacity>
+     <TouchableOpacity 
+  style={[s.mainBtn, { backgroundColor: '#fff', borderWidth: 1, borderColor: '#ccc', flexDirection: 'row', justifyContent: 'center', alignItems: 'center', marginTop: 15 }]} 
+  onPress={() => promptAsync()}
+>
+  <Ionicons name="logo-google" size={20} color="#db4437" style={{ marginRight: 10 }} />
+  <Text style={{ color: '#000', fontWeight: 'bold', fontSize: 16 }}>Войти через Google</Text>
+</TouchableOpacity>
       <TouchableOpacity onPress={() => setMode(mode === 'register' ? 'login' : 'register')}><Text style={s.linkText}>{mode === 'register' ? t.haveAcc : t.noAcc}</Text></TouchableOpacity>
     </View>
   );
